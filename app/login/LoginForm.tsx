@@ -3,29 +3,41 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type AuthMode = "sign-in" | "sign-up";
+
 export default function LoginForm() {
   const router = useRouter();
+  const [mode, setMode] = useState<AuthMode>("sign-in");
+  const [name, setName] = useState("Test User");
   const [email, setEmail] = useState("test@example.com");
   const [password, setPassword] = useState("Test1234!");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSignIn = async (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch("/api/auth/sign-in/email", {
+      const endpoint =
+        mode === "sign-up"
+          ? "/api/auth/sign-up/email"
+          : "/api/auth/sign-in/email";
+
+      const payload =
+        mode === "sign-up" ? { name, email, password } : { email, password };
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const text = await res.text();
-        setError(text || "Login failed");
+        setError(text || "Request failed");
         return;
       }
 
@@ -38,9 +50,47 @@ export default function LoginForm() {
     }
   };
 
+  //TODO: Poprawić UI, dodać obsługę błędów z backendu (np. email już istnieje) i loading state na przycisku submit. Dodać też potwierdzenie hasła przy rejestracji.
   return (
-    <form className="w-full rounded-lg border p-6" onSubmit={handleSignIn}>
-      <h1 className="mb-4 text-2xl font-semibold">Login</h1>
+    <form className="w-full rounded-lg border p-6" onSubmit={handleSubmit}>
+      <div className="mb-5 grid grid-cols-2 rounded border p-1">
+        <button
+          type="button"
+          onClick={() => {
+            setMode("sign-in");
+            setError("");
+          }}
+          className={`rounded px-3 py-2 text-sm ${mode === "sign-in" ? "bg-black text-white" : ""}`}
+        >
+          Sign In
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMode("sign-up");
+            setError("");
+          }}
+          className={`rounded px-3 py-2 text-sm ${mode === "sign-up" ? "bg-black text-white" : ""}`}
+        >
+          Sign Up
+        </button>
+      </div>
+
+      <h1 className="mb-4 text-2xl font-semibold">
+        {mode === "sign-up" ? "Create Account" : "Login"}
+      </h1>
+
+      {mode === "sign-up" ? (
+        <label className="mb-3 grid gap-1">
+          <span className="text-sm">Name</span>
+          <input
+            className="rounded border px-3 py-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </label>
+      ) : null}
 
       <label className="mb-3 grid gap-1">
         <span className="text-sm">Email</span>
@@ -69,7 +119,11 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full rounded bg-black px-3 py-2 text-white disabled:opacity-60"
       >
-        {loading ? "Logging in..." : "Sign In"}
+        {loading
+          ? "Please wait..."
+          : mode === "sign-up"
+            ? "Create Account"
+            : "Sign In"}
       </button>
 
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}

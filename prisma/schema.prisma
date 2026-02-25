@@ -24,6 +24,7 @@ model User {
 
   sessions      Session[]
   accounts      Account[]
+  expenses      Expense[]
 }
 
 model Session {
@@ -70,4 +71,15 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, value])
+}
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  String   // np. "food", "rent"
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([category])
 }
