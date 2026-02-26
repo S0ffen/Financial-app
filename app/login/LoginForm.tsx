@@ -52,7 +52,10 @@ export default function LoginForm() {
 
   //TODO: Poprawić UI, dodać obsługę błędów z backendu (np. email już istnieje) i loading state na przycisku submit. Dodać też potwierdzenie hasła przy rejestracji.
   return (
-    <form className="w-full rounded-lg border p-6" onSubmit={handleSubmit}>
+    <form
+      className="w-full rounded-lg border p-6 bg-white"
+      onSubmit={handleSubmit}
+    >
       <div className="mb-5 grid grid-cols-2 rounded border p-1">
         <button
           type="button"
