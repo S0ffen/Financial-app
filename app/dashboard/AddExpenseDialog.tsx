@@ -15,10 +15,27 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+type Props = {
+  category: string;
+  amount: number;
+};
+
 export const AddExpenseDialog: React.FC = () => {
-  const handleSubmit = () => {
-    console.log("submit");
-  };
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const category = formData.get("category");
+    const amount = formData.get("amount");
+    console.log("Submitting:", { category, amount });
+
+    const resp = await fetch("/api/expenses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category, amount }),
+    });
+    const data = await resp.json();
+    console.log(data);
+  }
 
   return (
     <Dialog>
@@ -36,20 +53,21 @@ export const AddExpenseDialog: React.FC = () => {
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="category">Category</Label>
+              <Input id="category" name="category" defaultValue="Food" />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+              <Label htmlFor="amount">Amount</Label>
+              <Input id="amount" name="amount" defaultValue="0" type="number" />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            {/*TODO: Pomyslec co tu dać bo nawet jak dam złe dane i dam dialogclose to mi zamknie a ma byc walidacja */}
-            <Button type="submit">Save changes</Button>
+            <DialogClose asChild>
+              <Button type="submit">Save changes</Button>
+            </DialogClose>
           </DialogFooter>
         </form>
       </DialogContent>
