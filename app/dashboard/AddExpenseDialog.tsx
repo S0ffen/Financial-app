@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,17 +15,15 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-type Props = {
-  category: string;
-  amount: number;
-};
+
+const categories = ["Food", "Rent", "Occasional", "Entertainment"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const category = formData.get("category");
-    const amount = formData.get("amount");
+    const amount = Number(formData.get("amount"));
     console.log("Submitting:", { category, amount });
 
     const resp = await fetch("/api/expenses", {
@@ -35,7 +33,7 @@ export const AddExpenseDialog: React.FC = () => {
     });
     const data = await resp.json();
     console.log(data);
-  }
+  };
 
   return (
     <Dialog>
@@ -47,14 +45,24 @@ export const AddExpenseDialog: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Edit profile</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
+              Make changes to your profile here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
               <Label htmlFor="category">Category</Label>
-              <Input id="category" name="category" defaultValue="Food" />
+              <select
+                id="category"
+                name="category"
+                defaultValue="Food"
+                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field>
               <Label htmlFor="amount">Amount</Label>
