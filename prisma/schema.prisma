@@ -78,6 +78,8 @@ model Expense {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category  String   // np. "food", "rent"
   amount    Decimal  @db.Decimal(10, 2)
+  currency  String   @default("PLN")
+  description String?
   createdAt DateTime @default(now())
 
   @@index([userId])
