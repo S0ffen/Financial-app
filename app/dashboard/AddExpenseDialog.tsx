@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,8 @@ const categories = ["Food", "Recurring", "Occasional", "Entertainment"] as const
 const currencies = ["PLN", "USD", "EUR"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
+  const [open, setOpen] = useState(false);
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -36,11 +39,20 @@ export const AddExpenseDialog: React.FC = () => {
       body: JSON.stringify({ category, amount, currency, description }),
     });
     const data = await resp.json();
+
     console.log(data);
+
+    if (resp.ok) {
+      setOpen(false);
+    }
+    //TODO: zmienić to potem na ładnego toast zamiast alertu
+    else {
+      alert(`Error: ${data.error || "Unknown error"}`);
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="btn-dark-pill">Test Button</Button>
       </DialogTrigger>
@@ -75,7 +87,15 @@ export const AddExpenseDialog: React.FC = () => {
             <Field>
               <Label htmlFor="amount">Amount</Label>
               <div className="flex gap-2 mb-2">
-                <Input id="amount" name="amount" defaultValue="0" type="number" />
+                <Input
+                  id="amount"
+                  name="amount"
+                  defaultValue="0.00"
+                  type="number"
+                  step={0.01}
+                  min={0.01}
+                  inputMode="decimal"
+                />
                 <select
                   id="currency"
                   name="currency"
@@ -95,9 +115,7 @@ export const AddExpenseDialog: React.FC = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <DialogClose asChild>
-              <Button type="submit">Save changes</Button>
-            </DialogClose>
+            <Button type="submit">Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

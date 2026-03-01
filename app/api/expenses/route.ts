@@ -4,14 +4,18 @@ import { prisma } from "@/app/src/lib/prisma";
 
 export async function GET() {
   console.log("HIT /api/expenses GET");
+  const session = await getServerSession();
+  console.log("Session:", session);
   return NextResponse.json({ message: "GET request received" });
 }
+
 type Expense = {
   category: string;
   amount: number;
   currency: string;
   description?: string;
 };
+
 export async function POST(request: Request) {
   let body: Expense;
   const session = await getServerSession();
@@ -23,20 +27,22 @@ export async function POST(request: Request) {
 
   try {
     body = await request.json();
-    //walidacja danych
+
+    // walidacja danych
     if (!body.category || typeof body.category !== "string" || body.category.trim() === "") {
       return NextResponse.json({ error: "Invalid category" }, { status: 400 });
     }
-    if (typeof body.amount === "string" || body.amount <= 0) {
-      const parsedAmount = Number(body.amount);
-      if (isNaN(parsedAmount) || parsedAmount <= 0 || Number.isFinite(parsedAmount) === false) {
-        return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
-      }
-      body.amount = parsedAmount;
+
+    const parsedAmount = Number(body.amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
+    body.amount = parsedAmount;
+
     if (!body.currency || typeof body.currency !== "string" || body.currency.trim() === "") {
       return NextResponse.json({ error: "Invalid currency" }, { status: 400 });
     }
+
     if (body.description && typeof body.description !== "string") {
       return NextResponse.json({ error: "Invalid description" }, { status: 400 });
     }
@@ -44,8 +50,7 @@ export async function POST(request: Request) {
     console.error("Error parsing request body:", error);
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  //Zwraca się expenseData, które zawiera dane nowo utworzenego rekordu aby nie trzeba było znowu pobierać z bazy danych.
-  //W przypadku błędu zwraca się odpowiedni komunikat i status HTTP.
+
   let expenseData;
   try {
     expenseData = await prisma.expense.create({
