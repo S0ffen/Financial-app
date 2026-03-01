@@ -9,6 +9,8 @@ export async function GET() {
 type Expense = {
   category: string;
   amount: number;
+  currency: string;
+  description?: string;
 };
 export async function POST(request: Request) {
   let body: Expense;
@@ -32,6 +34,12 @@ export async function POST(request: Request) {
       }
       body.amount = parsedAmount;
     }
+    if (!body.currency || typeof body.currency !== "string" || body.currency.trim() === "") {
+      return NextResponse.json({ error: "Invalid currency" }, { status: 400 });
+    }
+    if (body.description && typeof body.description !== "string") {
+      return NextResponse.json({ error: "Invalid description" }, { status: 400 });
+    }
   } catch (error) {
     console.error("Error parsing request body:", error);
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -45,6 +53,8 @@ export async function POST(request: Request) {
         category: body.category,
         amount: body.amount,
         userId: session.user.id,
+        currency: body.currency,
+        description: body.description,
       },
     });
   } catch (error) {

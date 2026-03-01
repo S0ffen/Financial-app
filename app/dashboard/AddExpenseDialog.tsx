@@ -16,7 +16,8 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const categories = ["Food", "Rent", "Occasional", "Entertainment"] as const;
+const categories = ["Food", "Recurring", "Occasional", "Entertainment"] as const;
+const currencies = ["PLN", "USD", "EUR"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -24,12 +25,15 @@ export const AddExpenseDialog: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     const category = formData.get("category");
     const amount = Number(formData.get("amount"));
-    console.log("Submitting:", { category, amount });
+    const currency = formData.get("currency");
+    const description = formData.get("description");
+
+    console.log("Submitting:", { category, amount, currency, description });
 
     const resp = await fetch("/api/expenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category, amount }),
+      body: JSON.stringify({ category, amount, currency, description }),
     });
     const data = await resp.json();
     console.log(data);
@@ -50,6 +54,10 @@ export const AddExpenseDialog: React.FC = () => {
           </DialogHeader>
           <FieldGroup>
             <Field>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" defaultValue="" />
+            </Field>
+            <Field>
               <Label htmlFor="category">Category</Label>
               <select
                 id="category"
@@ -66,7 +74,21 @@ export const AddExpenseDialog: React.FC = () => {
             </Field>
             <Field>
               <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" name="amount" defaultValue="0" type="number" />
+              <div className="flex gap-2 mb-2">
+                <Input id="amount" name="amount" defaultValue="0" type="number" />
+                <select
+                  id="currency"
+                  name="currency"
+                  defaultValue="PLN"
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                >
+                  {currencies.map((currency) => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </Field>
           </FieldGroup>
           <DialogFooter>
