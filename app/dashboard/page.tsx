@@ -22,13 +22,14 @@ export default async function DashboardPage() {
       acc[expense.category] = 0;
     }
 
-    // console.log("this is acc:", acc);
-    // console.log("this is expense:", expense);
-
     acc[expense.category] += parsedAmount;
     return acc;
   }, {});
-  console.log("User expenses by category:", userExpensesByCategory);
+
+  const pieChartData = Object.entries(userExpensesByCategory).map(([category, amount]) => ({
+    category,
+    amount: Number(amount.toFixed(2)),
+  }));
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-4 p-6">
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
       <p className="text-sm text-zinc-600">To jest przykladowa strona po zalogowaniu.</p>
 
       <AddExpenseDialog />
-      <ExpensesPieChart data={userExpensesByCategory} />
+      <ExpensesPieChart data={pieChartData} />
     </main>
   );
 }
