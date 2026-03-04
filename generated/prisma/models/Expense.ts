@@ -41,6 +41,7 @@ export type ExpenseMinAggregateOutputType = {
   amount: runtime.Decimal | null
   currency: string | null
   description: string | null
+  spentAt: Date | null
   createdAt: Date | null
 }
 
@@ -51,6 +52,7 @@ export type ExpenseMaxAggregateOutputType = {
   amount: runtime.Decimal | null
   currency: string | null
   description: string | null
+  spentAt: Date | null
   createdAt: Date | null
 }
 
@@ -61,6 +63,7 @@ export type ExpenseCountAggregateOutputType = {
   amount: number
   currency: number
   description: number
+  spentAt: number
   createdAt: number
   _all: number
 }
@@ -81,6 +84,7 @@ export type ExpenseMinAggregateInputType = {
   amount?: true
   currency?: true
   description?: true
+  spentAt?: true
   createdAt?: true
 }
 
@@ -91,6 +95,7 @@ export type ExpenseMaxAggregateInputType = {
   amount?: true
   currency?: true
   description?: true
+  spentAt?: true
   createdAt?: true
 }
 
@@ -101,6 +106,7 @@ export type ExpenseCountAggregateInputType = {
   amount?: true
   currency?: true
   description?: true
+  spentAt?: true
   createdAt?: true
   _all?: true
 }
@@ -198,6 +204,7 @@ export type ExpenseGroupByOutputType = {
   amount: runtime.Decimal
   currency: string
   description: string | null
+  spentAt: Date | null
   createdAt: Date
   _count: ExpenseCountAggregateOutputType | null
   _avg: ExpenseAvgAggregateOutputType | null
@@ -231,6 +238,7 @@ export type ExpenseWhereInput = {
   amount?: Prisma.DecimalFilter<"Expense"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"Expense"> | string
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
+  spentAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -242,6 +250,7 @@ export type ExpenseOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  spentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -256,6 +265,7 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.DecimalFilter<"Expense"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"Expense"> | string
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
+  spentAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
@@ -267,6 +277,7 @@ export type ExpenseOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  spentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ExpenseCountOrderByAggregateInput
   _avg?: Prisma.ExpenseAvgOrderByAggregateInput
@@ -285,6 +296,7 @@ export type ExpenseScalarWhereWithAggregatesInput = {
   amount?: Prisma.DecimalWithAggregatesFilter<"Expense"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringWithAggregatesFilter<"Expense"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
+  spentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Expense"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
 }
 
@@ -294,6 +306,7 @@ export type ExpenseCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutExpensesInput
 }
@@ -305,6 +318,7 @@ export type ExpenseUncheckedCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -314,6 +328,7 @@ export type ExpenseUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutExpensesNestedInput
 }
@@ -325,6 +340,7 @@ export type ExpenseUncheckedUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -335,6 +351,7 @@ export type ExpenseCreateManyInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -344,6 +361,7 @@ export type ExpenseUpdateManyMutationInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -354,6 +372,7 @@ export type ExpenseUncheckedUpdateManyInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -374,6 +393,7 @@ export type ExpenseCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  spentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -388,6 +408,7 @@ export type ExpenseMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  spentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -398,6 +419,7 @@ export type ExpenseMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  spentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -461,6 +483,7 @@ export type ExpenseCreateWithoutUserInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -470,6 +493,7 @@ export type ExpenseUncheckedCreateWithoutUserInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -509,6 +533,7 @@ export type ExpenseScalarWhereInput = {
   amount?: Prisma.DecimalFilter<"Expense"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"Expense"> | string
   description?: Prisma.StringNullableFilter<"Expense"> | string | null
+  spentAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
 }
 
@@ -518,6 +543,7 @@ export type ExpenseCreateManyUserInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   description?: string | null
+  spentAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -527,6 +553,7 @@ export type ExpenseUpdateWithoutUserInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -536,6 +563,7 @@ export type ExpenseUncheckedUpdateWithoutUserInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -545,6 +573,7 @@ export type ExpenseUncheckedUpdateManyWithoutUserInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -557,6 +586,7 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   amount?: boolean
   currency?: boolean
   description?: boolean
+  spentAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
@@ -568,6 +598,7 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   amount?: boolean
   currency?: boolean
   description?: boolean
+  spentAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
@@ -579,6 +610,7 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   amount?: boolean
   currency?: boolean
   description?: boolean
+  spentAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
@@ -590,10 +622,11 @@ export type ExpenseSelectScalar = {
   amount?: boolean
   currency?: boolean
   description?: boolean
+  spentAt?: boolean
   createdAt?: boolean
 }
 
-export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "amount" | "currency" | "description" | "createdAt", ExtArgs["result"]["expense"]>
+export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "category" | "amount" | "currency" | "description" | "spentAt" | "createdAt", ExtArgs["result"]["expense"]>
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -616,6 +649,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     amount: runtime.Decimal
     currency: string
     description: string | null
+    spentAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["expense"]>
   composites: {}
@@ -1047,6 +1081,7 @@ export interface ExpenseFieldRefs {
   readonly amount: Prisma.FieldRef<"Expense", 'Decimal'>
   readonly currency: Prisma.FieldRef<"Expense", 'String'>
   readonly description: Prisma.FieldRef<"Expense", 'String'>
+  readonly spentAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Expense", 'DateTime'>
 }
     

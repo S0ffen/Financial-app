@@ -14,6 +14,7 @@ type Expense = {
   amount: number;
   currency: string;
   description?: string;
+  date?: string;
 };
 
 export async function POST(request: Request) {
@@ -46,6 +47,13 @@ export async function POST(request: Request) {
     if (body.description && typeof body.description !== "string") {
       return NextResponse.json({ error: "Invalid description" }, { status: 400 });
     }
+    if (body.date) {
+      const parsedDate = new Date(body.date);
+      if (isNaN(parsedDate.getTime())) {
+        return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+      }
+      body.date = parsedDate.toISOString();
+    }
   } catch (error) {
     console.error("Error parsing request body:", error);
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -60,6 +68,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         currency: body.currency,
         description: body.description,
+        spentAt: body.date ? new Date(body.date) : new Date(),
       },
     });
   } catch (error) {

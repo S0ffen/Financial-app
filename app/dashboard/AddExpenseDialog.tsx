@@ -30,13 +30,14 @@ export const AddExpenseDialog: React.FC = () => {
     const amount = Number(formData.get("amount"));
     const currency = formData.get("currency");
     const description = formData.get("description");
+    const date = formData.get("date");
 
-    console.log("Submitting:", { category, amount, currency, description });
+    console.log("Submitting:", { category, amount, currency, description, date });
 
     const resp = await fetch("/api/expenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category, amount, currency, description }),
+      body: JSON.stringify({ category, amount, currency, description, date }),
     });
     const data = await resp.json();
 
@@ -66,8 +67,13 @@ export const AddExpenseDialog: React.FC = () => {
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="description">Description</Label>
-              <Input id="description" name="description" defaultValue="" />
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                defaultValue={new Date().toISOString().split("T")[0]}
+              />
             </Field>
             <Field>
               <Label htmlFor="category">Category</Label>
@@ -86,7 +92,7 @@ export const AddExpenseDialog: React.FC = () => {
             </Field>
             <Field>
               <Label htmlFor="amount">Amount</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2">
                 <Input
                   id="amount"
                   name="amount"
@@ -109,6 +115,10 @@ export const AddExpenseDialog: React.FC = () => {
                   ))}
                 </select>
               </div>
+            </Field>
+            <Field>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" defaultValue="" className="mb-4" />
             </Field>
           </FieldGroup>
           <DialogFooter>

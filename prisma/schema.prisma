@@ -80,6 +80,7 @@ model Expense {
   amount    Decimal  @db.Decimal(10, 2)
   currency  String   @default("PLN")
   description String?
+  spentAt   DateTime? 
   createdAt DateTime @default(now())
 
   @@index([userId])
