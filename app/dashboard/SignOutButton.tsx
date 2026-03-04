@@ -36,15 +36,15 @@ export default function SignOutButton() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-end gap-2">
       <button
         onClick={handleSignOut}
         disabled={loading}
-        className="rounded border px-3 py-2"
+        className="btn-dark-pill h-10 min-w-[110px] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Signing out..." : "Sign Out"}
       </button>
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-xs text-red-400">{error}</p> : null}
     </div>
   );
 }

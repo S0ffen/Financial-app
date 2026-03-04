@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import SignOutButton from "@/app/dashboard/SignOutButton";
 import { getServerSession } from "@/app/src/lib/session";
 import { AddExpenseDialog } from "./AddExpenseDialog";
 import { prisma } from "@/app/src/lib/prisma";
 import ExpensesPieChart from "./ExpensesPieChart";
+import Navbar from "./Navbar";
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -32,14 +32,15 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-4 p-6">
-      <SignOutButton />
-      <p className="text-sm text-zinc-700">Zalogowany jako: {session.user.email}</p>
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="text-sm text-zinc-600">To jest przykladowa strona po zalogowaniu.</p>
+    <div className="min-h-screen">
+      <Navbar userEmail={session.user.email} />
+      <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-6">
+        <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
+        <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
 
-      <AddExpenseDialog />
-      <ExpensesPieChart data={pieChartData} />
-    </main>
+        <AddExpenseDialog />
+        <ExpensesPieChart data={pieChartData} />
+      </main>
+    </div>
   );
 }
