@@ -4,6 +4,7 @@ import { AddExpenseDialog } from "./components/AddExpenseDialog";
 import { prisma } from "@/app/src/lib/prisma";
 import ExpensesPieChart from "./components/ExpensesPieChart";
 import MonthFilter from "./components/MonthFilter";
+import SalaryChartCard from "./components/SalaryChartCard";
 
 export default async function DashboardPage({
   searchParams,
@@ -73,13 +74,14 @@ export default async function DashboardPage({
   }));
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
+    <main className="mx-auto flex w-full flex-col gap-4 px-4 py-6 lg:w-[75%]">
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
       <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />
 
       <AddExpenseDialog />
-      <div>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <SalaryChartCard />
         <ExpensesPieChart data={pieChartData} />
       </div>
     </main>
