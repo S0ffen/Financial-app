@@ -6,10 +6,6 @@ import ExpensesPieChart from "./ExpensesPieChart";
 import Navbar from "./Navbar";
 import MonthFilter from "./MonthFilter";
 
-type DashboardPageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -51,14 +47,14 @@ export default async function DashboardPage({
   }
 
   //TODO: czemu jest raz 23 raz 22 , a raz 21? chyba timezone, trzeba to ogarnąć
-  const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0).toISOString();
-  const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toISOString();
+  const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
+  const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0);
 
   console.log("Start date:", start);
   console.log("End date:", end);
 
   const userExpenses = await prisma.expense.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, spentAt: { gte: start, lt: end } },
     orderBy: { spentAt: "desc" },
   });
 
