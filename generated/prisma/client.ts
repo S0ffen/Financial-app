@@ -64,3 +64,8 @@ export type Verification = Prisma.VerificationModel
  * 
  */
 export type Expense = Prisma.ExpenseModel
+/**
+ * Model SalaryRecord
+ * 
+ */
+export type SalaryRecord = Prisma.SalaryRecordModel

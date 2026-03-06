@@ -25,6 +25,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   expenses      Expense[]
+  salaryRecords SalaryRecord[]
 }
 
 model Session {
@@ -85,4 +86,14 @@ model Expense {
 
   @@index([userId])
   @@index([category])
+}
+model SalaryRecord{
+  id        String   @id @default(cuid())
+  userId    String 
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  minimumWage    Decimal  @db.Decimal(10, 2)
+  salary  Decimal  @db.Decimal(10, 2)
+  period   DateTime? 
+  createdAt DateTime @default(now())
+  @@index([userId])
 }

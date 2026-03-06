@@ -388,7 +388,8 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  Expense: 'Expense'
+  Expense: 'Expense',
+  SalaryRecord: 'SalaryRecord'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "expense"
+    modelProps: "user" | "session" | "account" | "verification" | "expense" | "salaryRecord"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SalaryRecord: {
+      payload: Prisma.$SalaryRecordPayload<ExtArgs>
+      fields: Prisma.SalaryRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SalaryRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SalaryRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.SalaryRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SalaryRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        findMany: {
+          args: Prisma.SalaryRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>[]
+        }
+        create: {
+          args: Prisma.SalaryRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        createMany: {
+          args: Prisma.SalaryRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SalaryRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.SalaryRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        update: {
+          args: Prisma.SalaryRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.SalaryRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SalaryRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SalaryRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.SalaryRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SalaryRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.SalaryRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSalaryRecord>
+        }
+        groupBy: {
+          args: Prisma.SalaryRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SalaryRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SalaryRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SalaryRecordCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -887,6 +962,18 @@ export const ExpenseScalarFieldEnum = {
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const SalaryRecordScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  minimumWage: 'minimumWage',
+  salary: 'salary',
+  period: 'period',
+  createdAt: 'createdAt'
+} as const
+
+export type SalaryRecordScalarFieldEnum = (typeof SalaryRecordScalarFieldEnum)[keyof typeof SalaryRecordScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1081,6 +1168,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   expense?: Prisma.ExpenseOmit
+  salaryRecord?: Prisma.SalaryRecordOmit
 }
 
 /* Types for Logging */
