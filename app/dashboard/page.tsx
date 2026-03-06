@@ -73,7 +73,7 @@ export default async function DashboardPage({
   }));
 
   return (
-    <main className="mx-auto flex w-full max-w-1/2 flex-col gap-4 p-6">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
       <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />

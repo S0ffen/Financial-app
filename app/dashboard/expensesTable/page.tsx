@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
 import DeleteExpenseButton from "./DeleteExpenseButton";
+import MonthFilter from "../MonthFilter";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
@@ -9,23 +10,47 @@ const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   day: "2-digit",
 });
 
-export default async function ExpensesTablePage() {
+type ExpensesTablePageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ExpensesTablePage({ searchParams }: ExpensesTablePageProps) {
   const session = await getServerSession();
 
   if (!session) {
     redirect("/login");
   }
 
+  const sp = await searchParams;
+  const monthRaw = Array.isArray(sp.month) ? sp.month[0] : sp.month;
+  const yearRaw = Array.isArray(sp.year) ? sp.year[0] : sp.year;
+
+  const month = Number(monthRaw);
+  const year = Number(yearRaw);
+
+  const selectedMonth =
+    Number.isInteger(month) && month >= 1 && month <= 12 ? month : new Date().getMonth() + 1;
+  const selectedYear =
+    Number.isInteger(year) && year >= 2000 && year <= 2100 ? year : new Date().getFullYear();
+
+  const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
+  const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0);
+
   const expenses = await prisma.expense.findMany({
-    where: { userId: session.user.id },
+    where: {
+      userId: session.user.id,
+      spentAt: {
+        gte: start,
+        lt: end,
+      },
+    },
     orderBy: { spentAt: "desc" },
   });
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
       <h1 className="text-2xl font-semibold text-zinc-100">Expenses Table</h1>
-
-      <p className="text-sm text-zinc-400">Lista wszystkich wydatkow zalogowanego uzytkownika.</p>
+      <MonthFilter />
 
       <section className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/60">
         <table className="min-w-full text-sm">

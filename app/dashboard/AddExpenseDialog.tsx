@@ -58,15 +58,13 @@ export const AddExpenseDialog: React.FC = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="btn-dark-pill">Test Button</Button>
+        <Button className="btn-dark-pill">Add new expense</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re done.
-            </DialogDescription>
+            <DialogTitle>Add new expense</DialogTitle>
+            <DialogDescription>Fill in the details for the new expense.</DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
