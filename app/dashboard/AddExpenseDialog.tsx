@@ -16,11 +16,13 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 const categories = ["Food", "Recurring", "Occasional", "Entertainment"] as const;
 const currencies = ["PLN", "USD", "EUR"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -45,6 +47,7 @@ export const AddExpenseDialog: React.FC = () => {
 
     if (resp.ok) {
       setOpen(false);
+      router.refresh(); // Odśwież stronę, aby pokazać nowy wydatek
     }
     //TODO: zmienić to potem na ładnego toast zamiast alertu
     else {
