@@ -3,7 +3,6 @@ import { getServerSession } from "@/app/src/lib/session";
 import { AddExpenseDialog } from "./AddExpenseDialog";
 import { prisma } from "@/app/src/lib/prisma";
 import ExpensesPieChart from "./ExpensesPieChart";
-import Navbar from "./Navbar";
 import MonthFilter from "./MonthFilter";
 
 export default async function DashboardPage({
@@ -74,18 +73,15 @@ export default async function DashboardPage({
   }));
 
   return (
-    <div className="min-h-screen">
-      <Navbar userEmail={session.user.email} />
-      <main className="mx-auto flex w-full max-w-1/2 flex-col gap-4 p-6">
-        <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
-        <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
-        <MonthFilter />
+    <main className="mx-auto flex w-full max-w-1/2 flex-col gap-4 p-6">
+      <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
+      <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
+      <MonthFilter />
 
-        <AddExpenseDialog />
-        <div>
-          <ExpensesPieChart data={pieChartData} />
-        </div>
-      </main>
-    </div>
+      <AddExpenseDialog />
+      <div>
+        <ExpensesPieChart data={pieChartData} />
+      </div>
+    </main>
   );
 }

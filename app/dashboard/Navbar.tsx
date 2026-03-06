@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SignOutButton from "./SignOutButton";
 
 type NavbarProps = {
@@ -11,6 +12,15 @@ export default function Navbar({ userEmail }: NavbarProps) {
         <div className="flex items-center gap-3">
           <div className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_16px_rgba(34,211,238,0.7)]" />
           <p className="text-sm font-semibold tracking-wide text-zinc-100">Finance Dashboard</p>
+          <Link href="/dashboard" className="ml-4 text-sm text-zinc-400 hover:text-zinc-200">
+            Dashboard
+          </Link>
+          <Link
+            href="/dashboard/expensesTable"
+            className="ml-4 text-sm text-zinc-400 hover:text-zinc-200"
+          >
+            Expenses Table
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">
