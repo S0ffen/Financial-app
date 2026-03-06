@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/app/src/lib/session";
-import { AddExpenseDialog } from "./AddExpenseDialog";
+import { AddExpenseDialog } from "./components/AddExpenseDialog";
 import { prisma } from "@/app/src/lib/prisma";
-import ExpensesPieChart from "./ExpensesPieChart";
-import MonthFilter from "./MonthFilter";
+import ExpensesPieChart from "./components/ExpensesPieChart";
+import MonthFilter from "./components/MonthFilter";
 
 export default async function DashboardPage({
   searchParams,

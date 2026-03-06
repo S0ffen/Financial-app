@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
 import DeleteExpenseButton from "./DeleteExpenseButton";
-import MonthFilter from "../MonthFilter";
+import MonthFilter from "../components/MonthFilter";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
