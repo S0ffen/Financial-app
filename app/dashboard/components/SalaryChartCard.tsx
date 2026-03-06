@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,12 +17,55 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
-export default function SalaryChartCard() {
+type SalaryChartDataPoint = {
+  period: string;
+  salary: number;
+  minimumWage: number;
+};
+
+type SalaryChartCardProps = {
+  data: SalaryChartDataPoint[];
+};
+
+export default function SalaryChartCard({ data }: SalaryChartCardProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const today = new Date().toISOString().split("T")[0];
+  const latestRecord = data.length ? data[data.length - 1] : null;
+  const chartConfig = {
+    amount: {
+      label: "Amount",
+    },
+  } satisfies ChartConfig;
+
+  // Percent above minimum wage for the latest record in selected period.
+  const percentAboveMinimum =
+    latestRecord && latestRecord.minimumWage > 0
+      ? ((latestRecord.salary - latestRecord.minimumWage) / latestRecord.minimumWage) * 100
+      : null;
+
+  const barChartData = latestRecord
+    ? [
+        {
+          label: "Your salary",
+          amount: latestRecord.salary,
+          fill: "var(--chart-2)",
+        },
+        {
+          label: "Minimum wage",
+          amount: latestRecord.minimumWage,
+          fill: "var(--chart-5)",
+        },
+      ]
+    : [];
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
@@ -59,11 +103,11 @@ export default function SalaryChartCard() {
   return (
     <Card className="border-zinc-800 bg-zinc-950/60 text-zinc-100">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-zinc-100">Salary Overview</CardTitle>
             <CardDescription className="text-zinc-400">
-              Porownanie Twojej wyplaty z najnizsza krajowa.
+              Comparison of your salary against the minimum wage.
             </CardDescription>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -157,11 +201,53 @@ export default function SalaryChartCard() {
             </DialogContent>
           </Dialog>
         </div>
+        {percentAboveMinimum !== null ? (
+          <p className="mx-auto mt-3 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-center text-sm font-semibold text-zinc-100 sm:max-w-[50%]">
+            {percentAboveMinimum >= 0 ? "+" : ""}
+            {percentAboveMinimum.toFixed(1)}% vs minimum
+          </p>
+        ) : null}
       </CardHeader>
 
       <CardContent>
         <div className="flex h-[260px] items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-900/40">
-          <p className="text-sm text-zinc-400">Brak danych do wykresu.</p>
+          {data.length === 0 ? (
+            <p className="text-sm text-zinc-400">No salary data for selected period.</p>
+          ) : (
+            <ChartContainer
+              config={chartConfig}
+              className="h-full w-full px-2 [&_.recharts-text]:fill-zinc-100"
+            >
+              <BarChart
+                data={barChartData}
+                margin={{ top: 20, right: 12, left: 12, bottom: 8 }}
+                barCategoryGap="45%"
+              >
+                <CartesianGrid vertical={false} stroke="rgba(113,113,122,0.35)" />
+                <XAxis dataKey="label" axisLine={false} tickLine={false} tickMargin={8} />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      nameKey="label"
+                      className="border-zinc-700 bg-zinc-900 text-zinc-100 [&_*]:text-zinc-100"
+                    />
+                  }
+                />
+                <Bar dataKey="amount" radius={[8, 8, 0, 0]} barSize={56}>
+                  {barChartData.map((entry) => (
+                    <Cell key={entry.label} fill={entry.fill} />
+                  ))}
+                  <LabelList
+                    dataKey="amount"
+                    position="top"
+                    className="fill-zinc-100"
+                    formatter={(value: number) => value.toFixed(2)}
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          )}
         </div>
       </CardContent>
     </Card>

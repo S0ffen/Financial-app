@@ -6,6 +6,33 @@ import ExpensesPieChart from "./components/ExpensesPieChart";
 import MonthFilter from "./components/MonthFilter";
 import SalaryChartCard from "./components/SalaryChartCard";
 
+type SalaryChartDataPoint = {
+  period: string;
+  salary: number;
+  minimumWage: number;
+};
+
+// Dedykowany loader danych dla rekordów wynagrodzeń, aby utrzymać komponent strony czytelnym.
+async function getSalaryChartData(
+  userId: string,
+  start: Date,
+  end: Date,
+): Promise<SalaryChartDataPoint[]> {
+  const salaryRecords = await prisma.salaryRecord.findMany({
+    where: {
+      userId,
+      period: { gte: start, lt: end },
+    },
+    orderBy: { period: "asc" },
+  });
+
+  return salaryRecords.map((record) => ({
+    period: (record.period ?? record.createdAt).toISOString(),
+    salary: Number(record.salary),
+    minimumWage: Number(record.minimumWage),
+  }));
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -72,6 +99,7 @@ export default async function DashboardPage({
     category,
     amount: Number(amount.toFixed(2)),
   }));
+  const salaryChartData = await getSalaryChartData(session.user.id, start, end);
 
   return (
     <main className="mx-auto flex w-full flex-col gap-4 px-4 py-6 lg:w-[75%]">
@@ -81,7 +109,7 @@ export default async function DashboardPage({
 
       <AddExpenseDialog />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <SalaryChartCard />
+        <SalaryChartCard data={salaryChartData} />
         <ExpensesPieChart data={pieChartData} />
       </div>
     </main>
