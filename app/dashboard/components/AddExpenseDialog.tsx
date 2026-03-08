@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
-const categories = ["Food", "Recurring", "Occasional", "Entertainment"] as const;
+const categories = ["Food", "Recurring", "Investment", "Occasional", "Entertainment"] as const;
 const currencies = ["PLN", "USD", "EUR"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
