@@ -3,6 +3,7 @@ import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
 import DeleteExpenseButton from "./DeleteExpenseButton";
 import MonthFilter from "../components/MonthFilter";
+import { AddExpenseDialog } from "../components/AddExpenseDialog";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
@@ -52,6 +53,7 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
       <h1 className="text-2xl font-semibold text-zinc-100">Expenses Table</h1>
       <MonthFilter />
 
+      <AddExpenseDialog />
       <section className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/60">
         <table className="min-w-full text-sm">
           <thead className="border-b border-zinc-800 bg-zinc-900/60">
