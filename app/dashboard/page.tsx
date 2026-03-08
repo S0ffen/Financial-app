@@ -5,11 +5,17 @@ import { prisma } from "@/app/src/lib/prisma";
 import ExpensesPieChart from "./components/ExpensesPieChart";
 import MonthFilter from "./components/MonthFilter";
 import SalaryChartCard from "./components/SalaryChartCard";
+import SavingsChartCard from "./components/SavingsChartCard";
 
 type SalaryChartDataPoint = {
   period: string;
   salary: number;
   minimumWage: number;
+};
+
+type SavingsSummary = {
+  income: number;
+  expenses: number;
 };
 
 // Dedykowany loader danych dla rekordów wynagrodzeń, aby utrzymać komponent strony czytelnym.
@@ -31,6 +37,24 @@ async function getSalaryChartData(
     salary: Number(record.salary),
     minimumWage: Number(record.minimumWage),
   }));
+}
+
+// Builds a small summary for the savings chart: latest salary and total monthly expenses.
+function getSavingsSummary(
+  salaryData: SalaryChartDataPoint[],
+  userExpenses: Array<{ amount: unknown }>,
+): SavingsSummary {
+  const income = salaryData.length ? salaryData[salaryData.length - 1].salary : 0;
+
+  const expenses = userExpenses.reduce((sum, expense) => {
+    const parsedAmount = Number(expense.amount);
+    return Number.isFinite(parsedAmount) ? sum + parsedAmount : sum;
+  }, 0);
+
+  return {
+    income: Number(income.toFixed(2)),
+    expenses: Number(expenses.toFixed(2)),
+  };
 }
 
 export default async function DashboardPage({
@@ -100,15 +124,17 @@ export default async function DashboardPage({
     amount: Number(amount.toFixed(2)),
   }));
   const salaryChartData = await getSalaryChartData(session.user.id, start, end);
+  const savingsSummary = getSavingsSummary(salaryChartData, userExpenses);
 
   return (
     <main className="mx-auto flex w-full flex-col gap-4 px-4 py-6 lg:w-[75%]">
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
       <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SalaryChartCard data={salaryChartData} />
         <ExpensesPieChart data={pieChartData} />
+        <SavingsChartCard income={savingsSummary.income} expenses={savingsSummary.expenses} />
       </div>
     </main>
   );
