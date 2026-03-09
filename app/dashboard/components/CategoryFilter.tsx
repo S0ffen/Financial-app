@@ -2,29 +2,20 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
-const categories = ["Food", "Recurring", "Investment", "Occasional", "Entertainment"] as const;
-type Category = (typeof categories)[number];
-
-function parseCategory(value: string | null): Category | null {
-  if (!value) {
-    return null;
-  }
-
-  // Normalize from query param and accept only known categories.
-  const normalized = value.toLowerCase();
-  const matched = categories.find((category) => category.toLowerCase() === normalized);
-  return matched ?? null;
-}
+import {
+  expenseCategories,
+  parseExpenseCategory,
+  type ExpenseCategory,
+} from "@/lib/constants/ExpenseCategories";
 
 export default function CategoryFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const selectedCategory = parseCategory(searchParams.get("category"));
+  const selectedCategory = parseExpenseCategory(searchParams.get("category"));
 
-  const onCategoryClick = (category: Category | null) => {
+  const onCategoryClick = (category: ExpenseCategory | null) => {
     const nextParams = new URLSearchParams(searchParams.toString());
 
     // "All" means no category filter in URL.
@@ -57,7 +48,7 @@ export default function CategoryFilter() {
           All
         </Button>
 
-        {categories.map((category) => {
+        {expenseCategories.map((category) => {
           const isActive = selectedCategory === category;
 
           return (

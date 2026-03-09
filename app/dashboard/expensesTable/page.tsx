@@ -6,6 +6,7 @@ import MonthFilter from "../components/MonthFilter";
 import CategoryFilter from "../components/CategoryFilter";
 import { AddExpenseDialog } from "../components/AddExpenseDialog";
 import type { Prisma } from "@/generated/prisma/client";
+import { parseExpenseCategory } from "@/lib/constants/ExpenseCategories";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
@@ -16,27 +17,6 @@ const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
 type ExpensesTablePageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-
-const allowedCategories = [
-  "Food",
-  "Recurring",
-  "Investment",
-  "Occasional",
-  "Entertainment",
-] as const;
-
-type AllowedCategory = (typeof allowedCategories)[number];
-
-function parseCategory(categoryParam: string | undefined): AllowedCategory | null {
-  if (!categoryParam) {
-    return null;
-  }
-
-  const normalized = categoryParam.toLowerCase();
-  const matched = allowedCategories.find((category) => category.toLowerCase() === normalized);
-
-  return matched ?? null;
-}
 
 export default async function ExpensesTablePage({ searchParams }: ExpensesTablePageProps) {
   const session = await getServerSession();
@@ -57,7 +37,7 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
     Number.isInteger(month) && month >= 1 && month <= 12 ? month : new Date().getMonth() + 1;
   const selectedYear =
     Number.isInteger(year) && year >= 2000 && year <= 2100 ? year : new Date().getFullYear();
-  const selectedCategory = parseCategory(categoryRaw);
+  const selectedCategory = parseExpenseCategory(categoryRaw);
 
   const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
   const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/app/src/lib/session";
 import { prisma } from "@/app/src/lib/prisma";
+import { parseExpenseCategory } from "@/lib/constants/ExpenseCategories";
 
 export async function GET() {
   console.log("HIT /api/expenses GET");
@@ -30,9 +31,11 @@ export async function POST(request: Request) {
     body = await request.json();
 
     // walidacja danych
-    if (!body.category || typeof body.category !== "string" || body.category.trim() === "") {
+    const parsedCategory = parseExpenseCategory(body.category);
+    if (!parsedCategory) {
       return NextResponse.json({ error: "Invalid category" }, { status: 400 });
     }
+    body.category = parsedCategory;
 
     const parsedAmount = Number(body.amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {

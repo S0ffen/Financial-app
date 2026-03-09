@@ -17,8 +17,8 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { expenseCategories } from "@/lib/constants/ExpenseCategories";
 
-const categories = ["Food", "Recurring", "Investment", "Occasional", "Entertainment"] as const;
 const currencies = ["PLN", "USD", "EUR"] as const;
 
 export const AddExpenseDialog: React.FC = () => {
@@ -78,13 +78,13 @@ export const AddExpenseDialog: React.FC = () => {
             </Field>
             <Field>
               <Label htmlFor="category">Category</Label>
-              <select
-                id="category"
-                name="category"
-                defaultValue="Food"
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-              >
-                {categories.map((category) => (
+                <select
+                  id="category"
+                  name="category"
+                  defaultValue={expenseCategories[0]}
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                >
+                {expenseCategories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
