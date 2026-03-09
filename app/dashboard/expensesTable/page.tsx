@@ -3,7 +3,9 @@ import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
 import DeleteExpenseButton from "./DeleteExpenseButton";
 import MonthFilter from "../components/MonthFilter";
+import CategoryFilter from "../components/CategoryFilter";
 import { AddExpenseDialog } from "../components/AddExpenseDialog";
+import type { Prisma } from "@/generated/prisma/client";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
@@ -15,6 +17,27 @@ type ExpensesTablePageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+const allowedCategories = [
+  "Food",
+  "Recurring",
+  "Investment",
+  "Occasional",
+  "Entertainment",
+] as const;
+
+type AllowedCategory = (typeof allowedCategories)[number];
+
+function parseCategory(categoryParam: string | undefined): AllowedCategory | null {
+  if (!categoryParam) {
+    return null;
+  }
+
+  const normalized = categoryParam.toLowerCase();
+  const matched = allowedCategories.find((category) => category.toLowerCase() === normalized);
+
+  return matched ?? null;
+}
+
 export default async function ExpensesTablePage({ searchParams }: ExpensesTablePageProps) {
   const session = await getServerSession();
 
@@ -25,6 +48,7 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
   const sp = await searchParams;
   const monthRaw = Array.isArray(sp.month) ? sp.month[0] : sp.month;
   const yearRaw = Array.isArray(sp.year) ? sp.year[0] : sp.year;
+  const categoryRaw = Array.isArray(sp.category) ? sp.category[0] : sp.category;
 
   const month = Number(monthRaw);
   const year = Number(yearRaw);
@@ -33,18 +57,26 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
     Number.isInteger(month) && month >= 1 && month <= 12 ? month : new Date().getMonth() + 1;
   const selectedYear =
     Number.isInteger(year) && year >= 2000 && year <= 2100 ? year : new Date().getFullYear();
+  const selectedCategory = parseCategory(categoryRaw);
 
   const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
   const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0);
 
-  const expenses = await prisma.expense.findMany({
-    where: {
-      userId: session.user.id,
-      spentAt: {
-        gte: start,
-        lt: end,
-      },
+  // Build dynamic Prisma filter: month/year always, category only when selected.
+  const where: Prisma.ExpenseWhereInput = {
+    userId: session.user.id,
+    spentAt: {
+      gte: start,
+      lt: end,
     },
+  };
+
+  if (selectedCategory) {
+    where.category = selectedCategory;
+  }
+
+  const expenses = await prisma.expense.findMany({
+    where,
     orderBy: { spentAt: "desc" },
   });
 
@@ -52,6 +84,7 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
       <h1 className="text-2xl font-semibold text-zinc-100">Expenses Table</h1>
       <MonthFilter />
+      <CategoryFilter />
 
       <AddExpenseDialog />
       <section className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/60">
