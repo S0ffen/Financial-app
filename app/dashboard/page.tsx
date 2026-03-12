@@ -5,7 +5,7 @@ import { prisma } from "@/app/src/lib/prisma";
 import ExpensesBarChart from "./components/ExpensesBarChart";
 import MonthFilter from "./components/MonthFilter";
 import SalaryChartCard from "./components/SalaryChartCard";
-import SavingsChartCard from "./components/SavingsChartCard";
+import MonthlySummaryCards from "./components/MonthlySummaryCards";
 
 type SalaryChartDataPoint = {
   period: string;
@@ -127,14 +127,14 @@ export default async function DashboardPage({
   const savingsSummary = getSavingsSummary(salaryChartData, userExpenses);
 
   return (
-    <main className="mx-auto flex w-full flex-col gap-4 px-4 py-6 lg:w-[75%]">
+    <main className="mx-auto flex w-full flex-col gap-4 px-4 py-6 max-w-6xl">
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
       <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <MonthlySummaryCards income={savingsSummary.income} expenses={savingsSummary.expenses} />
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <SalaryChartCard data={salaryChartData} />
         <ExpensesBarChart data={expensesBarChartData} />
-        <SavingsChartCard income={savingsSummary.income} expenses={savingsSummary.expenses} />
       </div>
     </main>
   );
