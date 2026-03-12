@@ -3,9 +3,10 @@ import SignOutButton from "./SignOutButton";
 
 type NavbarProps = {
   userEmail: string;
+  isAdmin: boolean;
 };
 
-export default function Navbar({ userEmail }: NavbarProps) {
+export default function Navbar({ userEmail, isAdmin }: NavbarProps) {
   return (
     <header className="sticky top-0 z-20 w-full border-b border-white/10 bg-black/40 backdrop-blur">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -21,6 +22,11 @@ export default function Navbar({ userEmail }: NavbarProps) {
           >
             Expenses Table
           </Link>
+          {isAdmin ? (
+            <Link href="/dashboard/admin" className="ml-4 text-sm text-zinc-400 hover:text-zinc-200">
+              Admin
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-4">

@@ -14,9 +14,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/login");
   }
 
+  const isAdmin = (session.user as { role?: string }).role === "admin";
+
   return (
     <div className="min-h-screen">
-      <Navbar userEmail={session.user.email} />
+      <Navbar userEmail={session.user.email} isAdmin={isAdmin} />
       {children}
     </div>
   );
