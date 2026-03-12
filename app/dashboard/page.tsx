@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/app/src/lib/session";
 import { AddExpenseDialog } from "./components/AddExpenseDialog";
 import { prisma } from "@/app/src/lib/prisma";
-import ExpensesPieChart from "./components/ExpensesPieChart";
+import ExpensesBarChart from "./components/ExpensesBarChart";
 import MonthFilter from "./components/MonthFilter";
 import SalaryChartCard from "./components/SalaryChartCard";
 import SavingsChartCard from "./components/SavingsChartCard";
@@ -119,7 +119,7 @@ export default async function DashboardPage({
     return acc;
   }, {});
 
-  const pieChartData = Object.entries(userExpensesByCategory).map(([category, amount]) => ({
+  const expensesBarChartData = Object.entries(userExpensesByCategory).map(([category, amount]) => ({
     category,
     amount: Number(amount.toFixed(2)),
   }));
@@ -133,7 +133,7 @@ export default async function DashboardPage({
       <MonthFilter />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <SalaryChartCard data={salaryChartData} />
-        <ExpensesPieChart data={pieChartData} />
+        <ExpensesBarChart data={expensesBarChartData} />
         <SavingsChartCard income={savingsSummary.income} expenses={savingsSummary.expenses} />
       </div>
     </main>
