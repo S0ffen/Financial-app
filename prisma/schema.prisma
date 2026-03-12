@@ -19,6 +19,10 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
+  role          String?   @default("user")
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -32,6 +36,7 @@ model Session {
   id        String   @id
   expiresAt DateTime
   token     String   @unique
+  impersonatedBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
