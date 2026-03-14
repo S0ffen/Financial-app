@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 
-type DeleteExpenseButtonProps = {
-  expenseId: string;
+type DeleteIncomeButtonProps = {
+  recordId: string;
 };
 
-export default function DeleteExpenseButton({ expenseId }: DeleteExpenseButtonProps) {
+export default function DeleteIncomeButton({ recordId }: DeleteIncomeButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -17,21 +17,21 @@ export default function DeleteExpenseButton({ expenseId }: DeleteExpenseButtonPr
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/expenses/${expenseId}`, {
+      const response = await fetch(`/api/salary-records/${recordId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
-        toast.error(payload?.error ?? "Nie udalo sie usunac wpisu.");
+        toast.error(payload?.error ?? "Failed to delete income record.");
         return;
       }
 
-      toast.success("Wpis zostal usuniety.");
+      toast.success("Income record deleted.");
       router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error("Blad sieci podczas usuwania wpisu.");
+      toast.error("Network error while deleting income record.");
     } finally {
       setIsDeleting(false);
     }
@@ -39,11 +39,11 @@ export default function DeleteExpenseButton({ expenseId }: DeleteExpenseButtonPr
 
   return (
     <ConfirmDeleteDialog
-      title="Delete expense"
-      description="This action will permanently remove the selected expense."
+      title="Delete income record"
+      description="This action will permanently remove the selected income record."
       isLoading={isDeleting}
-      triggerAriaLabel="Delete expense"
-      triggerTitle="Delete expense"
+      triggerAriaLabel="Delete income record"
+      triggerTitle="Delete income record"
       onConfirm={onDelete}
     />
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +17,6 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { expenseCategories } from "@/lib/constants/ExpenseCategories";
 
 const currencies = ["PLN", "USD", "EUR"] as const;
@@ -25,34 +25,31 @@ export const AddExpenseDialog: React.FC = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     const category = formData.get("category");
     const amount = Number(formData.get("amount"));
     const currency = formData.get("currency");
     const description = formData.get("description");
     const date = formData.get("date");
 
-    console.log("Submitting:", { category, amount, currency, description, date });
-
-    const resp = await fetch("/api/expenses", {
+    const response = await fetch("/api/expenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ category, amount, currency, description, date }),
     });
-    const data = await resp.json();
 
-    console.log(data);
+    const data = await response.json();
 
-    if (resp.ok) {
+    if (response.ok) {
       setOpen(false);
-      router.refresh(); // Odśwież stronę, aby pokazać nowy wydatek
+      toast.success("Expense saved.");
+      router.refresh();
+      return;
     }
-    //TODO: zmienić to potem na ładnego toast zamiast alertu
-    else {
-      alert(`Error: ${data.error || "Unknown error"}`);
-    }
+
+    toast.error(data.error || "Unknown error");
   };
 
   return (
@@ -78,12 +75,12 @@ export const AddExpenseDialog: React.FC = () => {
             </Field>
             <Field>
               <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
-                  name="category"
-                  defaultValue={expenseCategories[0]}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                >
+              <select
+                id="category"
+                name="category"
+                defaultValue={expenseCategories[0]}
+                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              >
                 {expenseCategories.map((category) => (
                   <option key={category} value={category}>
                     {category}

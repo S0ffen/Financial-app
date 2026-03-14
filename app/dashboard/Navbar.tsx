@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BarChart3, LayoutDashboard, Menu, Shield, X } from "lucide-react";
+import { BarChart3, Coins, LayoutDashboard, Menu, Shield, X } from "lucide-react";
 import SignOutButton from "./SignOutButton";
 
 type NavbarProps = {
@@ -38,6 +38,11 @@ export default function Navbar({ userEmail, isAdmin }: NavbarProps) {
       href: "/dashboard/expensesTable",
       label: "Expenses",
       icon: BarChart3,
+    },
+    {
+      href: "/dashboard/income",
+      label: "Income",
+      icon: Coins,
     },
   ];
 
