@@ -36,11 +36,11 @@ export default function SignOutButton() {
   };
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className="flex w-full flex-col gap-2">
       <button
         onClick={handleSignOut}
         disabled={loading}
-        className="btn-dark-pill h-10 min-w-[110px] px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-dark-pill h-10 w-full px-4 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Signing out..." : "Sign Out"}
       </button>

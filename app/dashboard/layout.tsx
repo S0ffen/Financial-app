@@ -17,9 +17,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   const isAdmin = (session.user as { role?: string }).role === "admin";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(36,44,64,0.35),_transparent_40%),linear-gradient(180deg,_#09090b_0%,_#050507_100%)]">
       <Navbar userEmail={session.user.email} isAdmin={isAdmin} />
-      {children}
+      <div className="lg:pl-72">
+        {children}
+      </div>
     </div>
   );
 }
