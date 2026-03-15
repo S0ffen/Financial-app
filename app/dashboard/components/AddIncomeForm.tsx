@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,15 +10,60 @@ import { Label } from "@/components/ui/label";
 
 type AddIncomeFormProps = {
   defaultDate: string;
+  defaultMinimumWage?: string;
 };
 
-export default function AddIncomeForm({ defaultDate }: AddIncomeFormProps) {
+export default function AddIncomeForm({
+  defaultDate,
+  defaultMinimumWage = "",
+}: AddIncomeFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [minimumWageValue, setMinimumWageValue] = useState(defaultMinimumWage);
+
+  useEffect(() => {
+    if (defaultMinimumWage) {
+      setMinimumWageValue(defaultMinimumWage);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadLatestMinimumWage() {
+      try {
+        const response = await fetch("/api/salary-records", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          salaryRecords?: Array<{ minimumWage: number }>;
+        };
+
+        const latestRecord = payload.salaryRecords?.[0];
+        if (isMounted && latestRecord) {
+          setMinimumWageValue(Number(latestRecord.minimumWage).toFixed(2));
+        }
+      } catch (error) {
+        console.error("Failed to prefill minimum wage:", error);
+      }
+    }
+
+    void loadLatestMinimumWage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [defaultMinimumWage]);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const salary = Number(formData.get("salary"));
     const minimumWage = Number(formData.get("minimumWage"));
     const period = String(formData.get("period") ?? "");
@@ -39,7 +84,8 @@ export default function AddIncomeForm({ defaultDate }: AddIncomeFormProps) {
         return;
       }
 
-      event.currentTarget.reset();
+      form.reset();
+      setMinimumWageValue(minimumWage.toFixed(2));
       toast.success("Income record saved.");
       router.refresh();
     } catch (submitError) {
@@ -62,7 +108,7 @@ export default function AddIncomeForm({ defaultDate }: AddIncomeFormProps) {
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="salary" className="text-zinc-100">
-              Current salary
+              Add income
             </Label>
             <Input
               id="salary"
@@ -88,6 +134,8 @@ export default function AddIncomeForm({ defaultDate }: AddIncomeFormProps) {
               step="0.01"
               min="0"
               inputMode="decimal"
+              value={minimumWageValue}
+              onChange={(event) => setMinimumWageValue(event.target.value)}
               placeholder="e.g. 4666.00"
               className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
               required

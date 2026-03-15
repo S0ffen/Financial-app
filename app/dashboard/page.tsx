@@ -41,7 +41,7 @@ function getSavingsSummary(
   salaryData: SalaryChartDataPoint[],
   userExpenses: Array<{ amount: unknown }>,
 ): SavingsSummary {
-  const income = salaryData.length ? salaryData[salaryData.length - 1].salary : 0;
+  const income = salaryData.reduce((sum, record) => sum + record.salary, 0);
 
   const expenses = userExpenses.reduce((sum, expense) => {
     const parsedAmount = Number(expense.amount);

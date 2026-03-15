@@ -27,6 +27,9 @@ export default function SalaryChartCard({ data }: SalaryChartCardProps) {
     });
 
   const latestRecord = data.length ? data[data.length - 1] : null;
+  // Sumujemy wszystkie income entries z wybranego miesiaca, ale minimum wage
+  // traktujemy jako pojedyncza wartosc referencyjna z ostatniego rekordu.
+  const totalSalary = data.reduce((sum, record) => sum + record.salary, 0);
   const chartConfig = {
     amount: {
       label: "Amount",
@@ -35,14 +38,14 @@ export default function SalaryChartCard({ data }: SalaryChartCardProps) {
 
   const percentAboveMinimum =
     latestRecord && latestRecord.minimumWage > 0
-      ? ((latestRecord.salary - latestRecord.minimumWage) / latestRecord.minimumWage) * 100
+      ? ((totalSalary - latestRecord.minimumWage) / latestRecord.minimumWage) * 100
       : null;
 
   const barChartData = latestRecord
     ? [
         {
-          label: "Your salary",
-          amount: latestRecord.salary,
+          label: "Monthly income",
+          amount: totalSalary,
           fill: "#7fb5ef",
         },
         {
