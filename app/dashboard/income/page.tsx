@@ -1,10 +1,11 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { HandCoins } from "lucide-react";
 import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
 import AddIncomeForm from "../components/AddIncomeForm";
 import MonthFilter from "../components/MonthFilter";
 import DeleteIncomeButton from "./DeleteIncomeButton";
+import EditIncomeDialog from "./EditIncomeDialog";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   year: "numeric",
@@ -122,7 +123,15 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
                     </div>
                   </div>
 
-                  <DeleteIncomeButton recordId={record.id} />
+                  <div className="flex items-center gap-2">
+                    <EditIncomeDialog
+                      recordId={record.id}
+                      salary={Number(record.salary)}
+                      minimumWage={Number(record.minimumWage)}
+                      period={periodDate.toISOString().slice(0, 10)}
+                    />
+                    <DeleteIncomeButton recordId={record.id} />
+                  </div>
 
                   <div className="absolute right-0 top-0 h-full w-1 bg-emerald-400" />
                 </article>
@@ -134,3 +143,4 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
     </main>
   );
 }
+
