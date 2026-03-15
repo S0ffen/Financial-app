@@ -98,6 +98,7 @@ model SalaryRecord{
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   minimumWage    Decimal  @db.Decimal(10, 2)
   salary  Decimal  @db.Decimal(10, 2)
+  description String?
   period   DateTime? 
   createdAt DateTime @default(now())
   @@index([userId])

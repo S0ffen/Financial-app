@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type EditIncomeDialogProps = {
   recordId: string;
   salary: number;
   minimumWage: number;
+  description: string | null;
   period: string;
 };
 
@@ -28,6 +30,7 @@ export default function EditIncomeDialog({
   recordId,
   salary,
   minimumWage,
+  description,
   period,
 }: EditIncomeDialogProps) {
   const router = useRouter();
@@ -35,6 +38,8 @@ export default function EditIncomeDialog({
   const [isSaving, setIsSaving] = useState(false);
   const [salaryValue, setSalaryValue] = useState(salary.toFixed(2));
   const [minimumWageValue, setMinimumWageValue] = useState(minimumWage.toFixed(2));
+  // Trzymamy opis w osobnym stanie, zeby dialog edycji mial pelny prefill rekordu.
+  const [descriptionValue, setDescriptionValue] = useState(description ?? "");
   const [periodValue, setPeriodValue] = useState(period);
 
   // Przy zamknieciu albo ponownym otwarciu przywracamy dane z rekordu,
@@ -42,6 +47,7 @@ export default function EditIncomeDialog({
   const resetFormValues = () => {
     setSalaryValue(salary.toFixed(2));
     setMinimumWageValue(minimumWage.toFixed(2));
+    setDescriptionValue(description ?? "");
     setPeriodValue(period);
   };
 
@@ -64,6 +70,7 @@ export default function EditIncomeDialog({
         body: JSON.stringify({
           salary: Number(salaryValue),
           minimumWage: Number(minimumWageValue),
+          description: descriptionValue,
           period: periodValue,
         }),
       });
@@ -139,6 +146,20 @@ export default function EditIncomeDialog({
               onChange={(event) => setMinimumWageValue(event.target.value)}
               className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`description-${recordId}`} className="text-zinc-100">
+              Description
+            </Label>
+            <Textarea
+              id={`description-${recordId}`}
+              maxLength={300}
+              value={descriptionValue}
+              onChange={(event) => setDescriptionValue(event.target.value)}
+              placeholder="Add an optional note for this income record"
+              className="min-h-24 border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
             />
           </div>
 

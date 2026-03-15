@@ -70,7 +70,16 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
   });
 
   const totalIncome = records.reduce((sum, record) => sum + Number(record.salary), 0);
-  const defaultDate = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-01`;
+  const today = new Date();
+  // Gdy user jest na biezacym miesiacu, domyslnie podstawiamy dzisiejsza date.
+  // Dla innych miesiecy zostawiamy pierwszy dzien wybranego miesiaca.
+  const isCurrentSelectedMonth =
+    today.getFullYear() === selectedYear && today.getMonth() + 1 === selectedMonth;
+  const defaultDate = isCurrentSelectedMonth
+    ? `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
+        today.getDate(),
+      ).padStart(2, "0")}`
+    : `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-01`;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
@@ -114,12 +123,17 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
                         {amountFormatter.format(Number(record.salary))} PLN
                       </p>
 
-                      <p className="truncate text-sm text-zinc-400">
-                        Minimum wage: {amountFormatter.format(Number(record.minimumWage))} PLN
+                      <p className="truncate text-sm text-zinc-300">
+                        {record.description?.trim() ? record.description : "No description"}
                       </p>
                       <p className="text-right text-sm tabular-nums text-zinc-400">
                         {dateFormatter.format(periodDate)}
                       </p>
+
+                      <p className="truncate text-sm text-zinc-400">
+                        Minimum wage: {amountFormatter.format(Number(record.minimumWage))} PLN
+                      </p>
+                      <div />
                     </div>
                   </div>
 
@@ -128,6 +142,7 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
                       recordId={record.id}
                       salary={Number(record.salary)}
                       minimumWage={Number(record.minimumWage)}
+                      description={record.description}
                       period={periodDate.toISOString().slice(0, 10)}
                     />
                     <DeleteIncomeButton recordId={record.id} />
@@ -143,4 +158,3 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
     </main>
   );
 }
-

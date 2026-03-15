@@ -19,12 +19,18 @@ export async function PATCH(request: Request, context: RouteContext) {
         salary?: unknown;
         minimumWage?: unknown;
         period?: unknown;
+        description?: unknown;
       }
     | null;
 
   const salary = Number(body?.salary);
   const minimumWage = Number(body?.minimumWage);
   const period = new Date(String(body?.period ?? ""));
+  // Normalizujemy opis do przycietego stringa, zeby update nie zapisywal pustych spacji.
+  const description =
+    typeof body?.description === "string" && body.description.trim().length > 0
+      ? body.description.trim()
+      : null;
 
   // Walidujemy payload przed update, zeby nie zapisac pustych albo blednych danych.
   if (!Number.isFinite(salary) || salary <= 0) {
@@ -39,6 +45,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Invalid period date" }, { status: 400 });
   }
 
+  if (description && description.length > 300) {
+    return NextResponse.json({ error: "Description is too long" }, { status: 400 });
+  }
+
   try {
     // Aktualizujemy tylko rekord nalezacy do zalogowanego usera.
     const updatedRecord = await prisma.salaryRecord.updateMany({
@@ -49,6 +59,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       data: {
         salary,
         minimumWage,
+        description,
         period,
       },
     });

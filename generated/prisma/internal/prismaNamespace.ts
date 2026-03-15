@@ -974,6 +974,7 @@ export const SalaryRecordScalarFieldEnum = {
   userId: 'userId',
   minimumWage: 'minimumWage',
   salary: 'salary',
+  description: 'description',
   period: 'period',
   createdAt: 'createdAt'
 } as const

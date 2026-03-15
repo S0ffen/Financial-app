@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type AddIncomeFormProps = {
   defaultDate: string;
@@ -67,6 +68,8 @@ export default function AddIncomeForm({
     const salary = Number(formData.get("salary"));
     const minimumWage = Number(formData.get("minimumWage"));
     const period = String(formData.get("period") ?? "");
+    // Odczytujemy opis jako zwykly string z formularza i wysylamy go do API.
+    const description = String(formData.get("description") ?? "");
 
     setIsSaving(true);
 
@@ -74,7 +77,7 @@ export default function AddIncomeForm({
       const response = await fetch("/api/salary-records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ salary, minimumWage, period }),
+        body: JSON.stringify({ salary, minimumWage, period, description }),
       });
 
       const payload = await response.json().catch(() => null);
@@ -101,7 +104,7 @@ export default function AddIncomeForm({
       <CardHeader>
         <CardTitle className="text-zinc-100">Add income</CardTitle>
         <CardDescription className="text-zinc-400">
-          Save your salary and the minimum wage for the selected month.
+          Save your salary, description and the minimum wage for the selected month.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -164,6 +167,19 @@ export default function AddIncomeForm({
             >
               {isSaving ? "Saving..." : "Save income"}
             </Button>
+          </div>
+
+          <div className="space-y-2 md:col-span-2 xl:col-span-4">
+            <Label htmlFor="description" className="text-zinc-100">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              name="description"
+              maxLength={300}
+              placeholder="Add an optional note for this income record"
+              className="min-h-24 border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
+            />
           </div>
         </form>
       </CardContent>

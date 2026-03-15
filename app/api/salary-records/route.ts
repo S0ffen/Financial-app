@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getServerSession } from "@/app/src/lib/session";
 import { prisma } from "@/app/src/lib/prisma";
 
@@ -6,6 +6,7 @@ type SalaryRecordPayload = {
   salary: number;
   minimumWage: number;
   period: string;
+  description?: string;
 };
 
 export async function GET() {
@@ -27,6 +28,7 @@ export async function GET() {
       id: record.id,
       salary: Number(record.salary),
       minimumWage: Number(record.minimumWage),
+      description: record.description,
       period: record.period ? record.period.toISOString() : null,
       createdAt: record.createdAt.toISOString(),
     }));
@@ -60,6 +62,11 @@ export async function POST(request: Request) {
   const salary = Number(body.salary);
   const minimumWage = Number(body.minimumWage);
   const period = new Date(body.period);
+  // Normalizujemy opis do przycietego stringa, zeby nie zapisywac samych spacji.
+  const description =
+    typeof body.description === "string" && body.description.trim().length > 0
+      ? body.description.trim()
+      : null;
 
   // Walidacja danych biznesowych.
   if (!Number.isFinite(salary) || salary <= 0) {
@@ -74,18 +81,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid period date" }, { status: 400 });
   }
 
+  if (description && description.length > 300) {
+    return NextResponse.json({ error: "Description is too long" }, { status: 400 });
+  }
+
   try {
     // Zapis rekordu powiazanego z aktualnym userem.
     const salaryRecord = await prisma.salaryRecord.create({
       data: {
         salary,
         minimumWage,
+        description,
         period,
         userId: session.user.id,
       },
     });
 
-    return NextResponse.json({ salaryRecord }, { status: 201 });
+    return NextResponse.json(
+      {
+        salaryRecord: {
+          ...salaryRecord,
+          salary: Number(salaryRecord.salary),
+          minimumWage: Number(salaryRecord.minimumWage),
+        },
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error creating salary record:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
