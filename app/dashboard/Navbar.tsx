@@ -8,7 +8,7 @@ import { BarChart3, Coins, LayoutDashboard, Menu, Shield, X } from "lucide-react
 import SignOutButton from "./SignOutButton";
 
 type NavbarProps = {
-  userEmail: string;
+  userLabel: string;
   isAdmin: boolean;
 };
 
@@ -24,7 +24,7 @@ function navItemClass(isActive: boolean) {
     : "border-transparent text-zinc-400 hover:border-zinc-800 hover:bg-zinc-900 hover:text-zinc-100";
 }
 
-export default function Navbar({ userEmail, isAdmin }: NavbarProps) {
+export default function Navbar({ userLabel, isAdmin }: NavbarProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -103,7 +103,7 @@ export default function Navbar({ userEmail, isAdmin }: NavbarProps) {
       <div className="border-t border-white/10 px-4 py-4">
         <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/80 px-3 py-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">Signed in</p>
-          <p className="mt-1 truncate text-sm text-zinc-200">{userEmail}</p>
+          <p className="mt-1 truncate text-sm text-zinc-200">{userLabel}</p>
         </div>
         <SignOutButton />
       </div>
