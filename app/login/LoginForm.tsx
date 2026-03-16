@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,9 +8,10 @@ type AuthMode = "sign-in" | "sign-up";
 export default function LoginForm() {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>("sign-in");
-  const [name, setName] = useState("Test User");
+  const [name, setName] = useState("test");
+  const [username, setUsername] = useState("test");
   const [email, setEmail] = useState("test@example.com");
-  const [password, setPassword] = useState("Test1234!");
+  const [password, setPassword] = useState("test1234");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,12 +22,13 @@ export default function LoginForm() {
 
     try {
       const endpoint =
-        mode === "sign-up"
-          ? "/api/auth/sign-up/email"
-          : "/api/auth/sign-in/email";
+        mode === "sign-up" ? "/api/auth/sign-up/email" : "/api/auth/sign-in/username";
 
+      // Signup dalej zapisuje email, ale dodajemy username jako glowny login usera.
       const payload =
-        mode === "sign-up" ? { name, email, password } : { email, password };
+        mode === "sign-up"
+          ? { name, email, password, username, displayUsername: username }
+          : { username, password };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -50,12 +52,8 @@ export default function LoginForm() {
     }
   };
 
-  //TODO: Poprawić UI, dodać obsługę błędów z backendu (np. email już istnieje) i loading state na przycisku submit. Dodać też potwierdzenie hasła przy rejestracji.
   return (
-    <form
-      className="w-full rounded-lg border p-6 bg-white"
-      onSubmit={handleSubmit}
-    >
+    <form className="w-full rounded-lg border p-6 bg-white" onSubmit={handleSubmit}>
       <div className="mb-5 grid grid-cols-2 rounded border p-1">
         <button
           type="button"
@@ -96,15 +94,27 @@ export default function LoginForm() {
       ) : null}
 
       <label className="mb-3 grid gap-1">
-        <span className="text-sm">Email</span>
+        <span className="text-sm">Username</span>
         <input
-          type="email"
           className="rounded border px-3 py-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
       </label>
+
+      {mode === "sign-up" ? (
+        <label className="mb-3 grid gap-1">
+          <span className="text-sm">Email</span>
+          <input
+            type="email"
+            className="rounded border px-3 py-2"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+      ) : null}
 
       <label className="mb-4 grid gap-1">
         <span className="text-sm">Password</span>
@@ -122,11 +132,7 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full rounded bg-black px-3 py-2 text-white disabled:opacity-60"
       >
-        {loading
-          ? "Please wait..."
-          : mode === "sign-up"
-            ? "Create Account"
-            : "Sign In"}
+        {loading ? "Please wait..." : mode === "sign-up" ? "Create Account" : "Sign In"}
       </button>
 
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}

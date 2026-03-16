@@ -14,22 +14,24 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  role          String?   @default("user")
-  banned        Boolean?  @default(false)
-  banReason     String?
-  banExpires    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  username        String?   @unique
+  displayUsername String?
+  role            String?   @default("user")
+  banned          Boolean?  @default(false)
+  banReason       String?
+  banExpires      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  expenses      Expense[]
-  salaryRecords SalaryRecord[]
+  sessions        Session[]
+  accounts        Account[]
+  expenses        Expense[]
+  salaryRecords   SalaryRecord[]
 }
 
 model Session {
@@ -103,3 +105,4 @@ model SalaryRecord{
   createdAt DateTime @default(now())
   @@index([userId])
 }
+
