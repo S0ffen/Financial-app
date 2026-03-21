@@ -1,17 +1,20 @@
-// Jedno źródło prawdy dla kategorii wydatków używanych w całej aplikacji (UI + API).
+// Single source of truth for expense categories used by API and UI.
 export const expenseCategories = [
   "Food",
+  "Shopping",
   "Recurring",
+  "Health",
+  "Transport",
+  "Entertainment",
   "Investment",
   "Occasional",
-  "Entertainment",
+  "Uncategorized",
 ] as const;
 
-// Union typu: "Food" | "Recurring" | "Investment" | ...
-// Powstaje automatycznie na bazie expenseCategories.
+// Union type created directly from expenseCategories.
 export type ExpenseCategory = (typeof expenseCategories)[number];
 
-// Normalizuje wejście (np. " food " -> "Food") i zwraca poprawną kategorię albo null.
+// Normalizes input (for example " food " -> "Food") and returns a valid category or null.
 export function parseExpenseCategory(value: string | null | undefined): ExpenseCategory | null {
   if (!value) {
     return null;
@@ -23,8 +26,7 @@ export function parseExpenseCategory(value: string | null | undefined): ExpenseC
   return matched ?? null;
 }
 
-// Type guard: pozwala TypeScriptowi zawęzić typ po sprawdzeniu.
-// Po if (isExpenseCategory(x)) zmienna x ma typ ExpenseCategory.
+// Type guard used in forms and APIs.
 export function isExpenseCategory(value: unknown): value is ExpenseCategory {
   return typeof value === "string" && parseExpenseCategory(value) !== null;
 }

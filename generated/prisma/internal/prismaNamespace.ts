@@ -965,6 +965,9 @@ export const ExpenseScalarFieldEnum = {
   currency: 'currency',
   description: 'description',
   spentAt: 'spentAt',
+  importSource: 'importSource',
+  importHash: 'importHash',
+  externalTransactionId: 'externalTransactionId',
   createdAt: 'createdAt'
 } as const
 
@@ -978,6 +981,9 @@ export const SalaryRecordScalarFieldEnum = {
   salary: 'salary',
   description: 'description',
   period: 'period',
+  importSource: 'importSource',
+  importHash: 'importHash',
+  externalTransactionId: 'externalTransactionId',
   createdAt: 'createdAt'
 } as const
 

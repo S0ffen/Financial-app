@@ -1,0 +1,430 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { expenseCategories, type ExpenseCategory, parseExpenseCategory } from "@/lib/constants/ExpenseCategories";
+
+type PreviewRow = {
+  previewId: string;
+  importSource: "ing_csv";
+  importHash: string;
+  kind: "expense" | "income";
+  transactionDate: string | null;
+  bookingDate: string | null;
+  counterparty: string;
+  title: string;
+  details: string;
+  accountName: string;
+  externalTransactionId: string | null;
+  amount: number;
+  currency: string;
+  spentAt: string;
+  description: string;
+  suggestedCategory: ExpenseCategory | null;
+  minimumWage: number | null;
+  matchedRuleId: string | null;
+  matchedKeyword: string | null;
+  duplicate: boolean;
+  validationStatus: "ready" | "needs_review" | "duplicate";
+  validationMessage: string | null;
+  include: boolean;
+};
+
+type PreviewResponse = {
+  fileName: string;
+  summary: {
+    totalRows: number;
+    expenseRows: number;
+    incomeRows: number;
+    ignoredRows: number;
+    duplicateRows: number;
+    uncategorizedRows: number;
+    readyRows: number;
+  };
+  rows: Array<Omit<PreviewRow, "include">>;
+};
+
+export default function ExpenseCsvImportClient() {
+  const router = useRouter();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isCommitLoading, setIsCommitLoading] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [serverSummary, setServerSummary] = useState<PreviewResponse["summary"] | null>(null);
+  const [rows, setRows] = useState<PreviewRow[]>([]);
+
+  const derivedSummary = useMemo(() => {
+    return {
+      selectedRows: rows.filter((row) => row.include).length,
+      selectedExpenseRows: rows.filter((row) => row.include && row.kind === "expense").length,
+      selectedIncomeRows: rows.filter((row) => row.include && row.kind === "income").length,
+      duplicateRows: rows.filter((row) => row.duplicate).length,
+      reviewRows: rows.filter((row) => row.validationStatus === "needs_review" && row.include).length,
+      selectedExpenseAmount: rows
+        .filter((row) => row.include && row.kind === "expense")
+        .reduce((sum, row) => sum + row.amount, 0),
+      selectedIncomeAmount: rows
+        .filter((row) => row.include && row.kind === "income")
+        .reduce((sum, row) => sum + row.amount, 0),
+    };
+  }, [rows]);
+
+  const updateRow = (previewId: string, patch: Partial<PreviewRow>) => {
+    setRows((currentRows) =>
+      currentRows.map((row) => {
+        if (row.previewId !== previewId) {
+          return row;
+        }
+
+        const updatedRow = { ...row, ...patch };
+
+        // Po lokalnej edycji przeliczamy status row, zeby user od razu widzial czy rekord jest gotowy.
+        if (updatedRow.duplicate) {
+          return updatedRow;
+        }
+
+        if (updatedRow.kind === "expense" && updatedRow.suggestedCategory === "Uncategorized") {
+          return {
+            ...updatedRow,
+            validationStatus: "needs_review",
+            validationMessage: "Category could not be matched automatically.",
+          };
+        }
+
+        if (
+          updatedRow.kind === "income" &&
+          (!Number.isFinite(updatedRow.minimumWage) || Number(updatedRow.minimumWage) <= 0)
+        ) {
+          return {
+            ...updatedRow,
+            validationStatus: "needs_review",
+            validationMessage: "Set minimum wage for imported income before saving.",
+          };
+        }
+
+        return {
+          ...updatedRow,
+          validationStatus: "ready",
+          validationMessage: null,
+        };
+      }),
+    );
+  };
+
+  const handlePreview = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedFile) {
+      toast.error("Choose a CSV file first.");
+      return;
+    }
+
+    setIsPreviewLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch("/api/imports/bank-csv/preview", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json().catch(() => null)) as PreviewResponse | { error?: string } | null;
+
+      if (!response.ok || !payload || !("rows" in payload)) {
+        toast.error(payload && "error" in payload ? payload.error ?? "Failed to preview CSV." : "Failed to preview CSV.");
+        return;
+      }
+
+      setFileName(payload.fileName);
+      setServerSummary(payload.summary);
+      setRows(payload.rows.map((row) => ({ ...row, include: !row.duplicate })));
+      toast.success("CSV preview generated.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Network error while generating preview.");
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const handleCommit = async () => {
+    const selectedRows = rows.filter((row) => row.include);
+
+    if (selectedRows.length === 0) {
+      toast.error("Select at least one row to import.");
+      return;
+    }
+
+    setIsCommitLoading(true);
+
+    try {
+      const response = await fetch("/api/imports/bank-csv/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            importedExpenseCount?: number;
+            importedIncomeCount?: number;
+            duplicateCount?: number;
+            selectedCount?: number;
+            error?: string;
+          }
+        | null;
+
+      if (!response.ok) {
+        toast.error(payload?.error ?? "Failed to import CSV.");
+        return;
+      }
+
+      toast.success(
+        `Imported ${payload?.importedExpenseCount ?? 0} expenses and ${payload?.importedIncomeCount ?? 0} income rows. Skipped ${payload?.duplicateCount ?? 0} duplicates.`,
+      );
+      router.push("/dashboard/expensesTable");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Network error while importing transactions.");
+    } finally {
+      setIsCommitLoading(false);
+    }
+  };
+
+  const resetPreview = () => {
+    setFileName(null);
+    setServerSummary(null);
+    setRows([]);
+    setSelectedFile(null);
+  };
+
+  return (
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-100">Import bank CSV</h1>
+          <p className="mt-1 text-sm text-zinc-400">
+            Upload an ING CSV file, review detected expenses and salary transfers, then import only the rows you want.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/expensesTable"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 px-4 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-800"
+        >
+          Back to expenses
+        </Link>
+      </div>
+
+      <Card className="border-zinc-800 bg-zinc-950/70 text-zinc-100">
+        <CardHeader>
+          <CardTitle>Upload CSV</CardTitle>
+          <CardDescription className="text-zinc-400">
+            Supported format: ING export with transactions in semicolon-separated CSV.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePreview} className="flex flex-col gap-4 md:flex-row md:items-end">
+            <div className="flex-1 space-y-2">
+              <label className="text-sm font-medium text-zinc-100" htmlFor="csv-file">
+                CSV file
+              </label>
+              <Input
+                id="csv-file"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                className="border-zinc-700 bg-zinc-900/60 text-zinc-100 file:mr-4 file:border-0 file:bg-transparent file:text-zinc-300"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={isPreviewLoading} className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
+                {isPreviewLoading ? "Generating preview..." : "Generate preview"}
+              </Button>
+              {rows.length > 0 ? (
+                <Button type="button" variant="outline" onClick={resetPreview} className="border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 hover:text-zinc-50">
+                  Reset
+                </Button>
+              ) : null}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {serverSummary ? (
+        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+          <SummaryCard label="File rows" value={String(serverSummary.totalRows)} />
+          <SummaryCard label="Expenses" value={String(serverSummary.expenseRows)} />
+          <SummaryCard label="Income" value={String(serverSummary.incomeRows)} />
+          <SummaryCard label="Ignored" value={String(serverSummary.ignoredRows)} />
+          <SummaryCard label="Duplicates" value={String(serverSummary.duplicateRows)} />
+          <SummaryCard label="Needs review" value={String(rows.filter((row) => row.validationStatus === "needs_review").length)} />
+          <SummaryCard
+            label="Selected total"
+            value={`${derivedSummary.selectedExpenseAmount.toFixed(2)} out / ${derivedSummary.selectedIncomeAmount.toFixed(2)} in`}
+          />
+        </section>
+      ) : null}
+
+      {rows.length > 0 ? (
+        <Card className="border-zinc-800 bg-zinc-950/70 text-zinc-100">
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle>Preview{fileName ? `: ${fileName}` : ""}</CardTitle>
+              <CardDescription className="text-zinc-400">
+                Review categories, descriptions, dates and minimum wage values before saving imported transactions.
+              </CardDescription>
+            </div>
+            <Button onClick={handleCommit} disabled={isCommitLoading} className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
+              {isCommitLoading ? "Importing..." : `Import selected (${derivedSummary.selectedRows})`}
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {rows.map((row) => {
+              const statusClass =
+                row.duplicate
+                  ? "border-zinc-700 bg-zinc-900/40"
+                  : row.validationStatus === "needs_review"
+                    ? "border-amber-500/40 bg-amber-500/5"
+                    : row.kind === "income"
+                      ? "border-sky-500/20 bg-sky-500/5"
+                      : "border-emerald-500/20 bg-zinc-950/60";
+
+              return (
+                <article key={row.previewId} className={`rounded-xl border p-4 ${statusClass}`}>
+                  <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <label className="inline-flex items-center gap-2 text-sm font-medium text-zinc-100">
+                          <input
+                            type="checkbox"
+                            checked={row.include}
+                            disabled={row.duplicate}
+                            onChange={(event) => updateRow(row.previewId, { include: event.target.checked })}
+                            className="h-4 w-4 rounded border-zinc-600 bg-zinc-900"
+                          />
+                          Include row
+                        </label>
+                        <StatusBadge label={row.kind === "income" ? "Income" : "Expense"} tone={row.kind === "income" ? "sky" : "emerald"} />
+                        <StatusBadge
+                          label={row.duplicate ? "Duplicate" : row.validationStatus === "needs_review" ? "Needs review" : "Ready"}
+                          tone={row.duplicate ? "zinc" : row.validationStatus === "needs_review" ? "amber" : row.kind === "income" ? "sky" : "emerald"}
+                        />
+                        {row.kind === "expense" && row.matchedKeyword ? <StatusBadge label={`Rule: ${row.matchedKeyword}`} tone="sky" /> : null}
+                      </div>
+
+                      <div>
+                        <p className="truncate text-base font-semibold text-zinc-100">{row.counterparty}</p>
+                        <p className="truncate text-sm text-zinc-400">{row.title || "No title"}</p>
+                      </div>
+
+                      <div className={`grid gap-3 ${row.kind === "income" ? "md:grid-cols-2 xl:grid-cols-[180px_170px_170px_minmax(0,1fr)]" : "md:grid-cols-2 xl:grid-cols-[180px_170px_minmax(0,1fr)]"}`}>
+                        {row.kind === "expense" ? (
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Category</label>
+                            <select
+                              value={row.suggestedCategory ?? "Uncategorized"}
+                              onChange={(event) => {
+                                const nextCategory = parseExpenseCategory(event.target.value);
+                                if (nextCategory) {
+                                  updateRow(row.previewId, { suggestedCategory: nextCategory });
+                                }
+                              }}
+                              className="h-10 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100"
+                            >
+                              {expenseCategories.map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Minimum wage</label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={row.minimumWage ?? ""}
+                              onChange={(event) => updateRow(row.previewId, { minimumWage: event.target.value ? Number(event.target.value) : null })}
+                              className="border-zinc-700 bg-zinc-900/60 text-zinc-100"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Date</label>
+                          <Input
+                            type="date"
+                            value={row.spentAt}
+                            onChange={(event) => updateRow(row.previewId, { spentAt: event.target.value })}
+                            className="border-zinc-700 bg-zinc-900/60 text-zinc-100"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Description</label>
+                          <Input
+                            value={row.description}
+                            onChange={(event) => updateRow(row.previewId, { description: event.target.value })}
+                            className="border-zinc-700 bg-zinc-900/60 text-zinc-100"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-right xl:min-w-40">
+                      <p className={row.kind === "income" ? "text-lg font-semibold text-sky-300" : "text-lg font-semibold text-zinc-100"}>
+                        {row.amount.toFixed(2)} {row.currency}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-400">{row.accountName}</p>
+                      {row.validationMessage ? <p className="mt-2 text-xs text-zinc-400">{row.validationMessage}</p> : null}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </CardContent>
+        </Card>
+      ) : null}
+    </main>
+  );
+}
+
+type SummaryCardProps = {
+  label: string;
+  value: string;
+};
+
+function SummaryCard({ label, value }: SummaryCardProps) {
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{label}</p>
+      <p className="mt-2 text-xl font-semibold text-zinc-100">{value}</p>
+    </div>
+  );
+}
+
+type StatusBadgeProps = {
+  label: string;
+  tone: "emerald" | "amber" | "zinc" | "sky";
+};
+
+function StatusBadge({ label, tone }: StatusBadgeProps) {
+  const toneClass =
+    tone === "emerald"
+      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+      : tone === "amber"
+        ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+        : tone === "sky"
+          ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
+          : "border-zinc-700 bg-zinc-900 text-zinc-300";
+
+  return <span className={`rounded-full border px-2 py-1 text-xs font-medium ${toneClass}`}>{label}</span>;
+}

@@ -35,16 +35,16 @@ model User {
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
   impersonatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -80,29 +80,37 @@ model Verification {
 
   @@unique([identifier, value])
 }
+
 model Expense {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category  String   // np. "food", "rent"
-  amount    Decimal  @db.Decimal(10, 2)
-  currency  String   @default("PLN")
-  description String?
-  spentAt   DateTime? 
-  createdAt DateTime @default(now())
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            String
+  amount              Decimal  @db.Decimal(10, 2)
+  currency            String   @default("PLN")
+  description         String?
+  spentAt             DateTime?
+  importSource        String?
+  importHash          String?  @unique
+  externalTransactionId String?
+  createdAt           DateTime @default(now())
 
   @@index([userId])
   @@index([category])
 }
-model SalaryRecord{
-  id        String   @id @default(cuid())
-  userId    String 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  minimumWage    Decimal  @db.Decimal(10, 2)
-  salary  Decimal  @db.Decimal(10, 2)
+
+model SalaryRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  minimumWage Decimal  @db.Decimal(10, 2)
+  salary      Decimal  @db.Decimal(10, 2)
   description String?
-  period   DateTime? 
-  createdAt DateTime @default(now())
+  period      DateTime?
+  importSource String?
+  importHash String?  @unique
+  externalTransactionId String?
+  createdAt   DateTime @default(now())
+
   @@index([userId])
 }
-

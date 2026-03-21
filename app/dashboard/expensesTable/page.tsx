@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/app/src/lib/prisma";
@@ -72,7 +73,15 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
       <h1 className="text-2xl font-semibold text-zinc-100">Expenses</h1>
       <MonthFilter />
       <CategoryFilter />
-      <AddExpenseDialog />
+      <div className="flex flex-wrap gap-3">
+        <AddExpenseDialog />
+        <Link
+          href="/dashboard/expenses/import"
+          className="btn-dark-pill inline-flex items-center justify-center"
+        >
+          Import CSV
+        </Link>
+      </div>
 
       <section className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
         <header className="flex items-center justify-between border-b border-zinc-800 px-4 py-4 sm:px-5">
