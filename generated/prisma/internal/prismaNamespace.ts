@@ -977,7 +977,6 @@ export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeo
 export const SalaryRecordScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  minimumWage: 'minimumWage',
   salary: 'salary',
   description: 'description',
   period: 'period',

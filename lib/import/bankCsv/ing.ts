@@ -21,7 +21,6 @@ export type ParsedIngCsvRow = {
   spentAt: string;
   description: string;
   suggestedCategory: ExpenseCategory | null;
-  minimumWage: number | null;
   matchedRuleId: string | null;
   matchedKeyword: string | null;
 };
@@ -272,7 +271,6 @@ export function parseIngBankCsv(csvText: string): ParsedIngCsvResult {
         spentAt,
         description,
         suggestedCategory: matched.category,
-        minimumWage: null,
         matchedRuleId: matched.matchedRuleId,
         matchedKeyword: matched.matchedKeyword,
       });
@@ -295,7 +293,6 @@ export function parseIngBankCsv(csvText: string): ParsedIngCsvResult {
         spentAt,
         description,
         suggestedCategory: null,
-        minimumWage: null,
         matchedRuleId: null,
         matchedKeyword: null,
       });

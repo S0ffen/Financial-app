@@ -26,7 +26,6 @@ export async function GET() {
     const normalizedRecords = salaryRecords.map((record) => ({
       id: record.id,
       salary: Number(record.salary),
-      minimumWage: record.minimumWage !== null ? Number(record.minimumWage) : null,
       description: record.description,
       period: record.period ? record.period.toISOString() : null,
       createdAt: record.createdAt.toISOString(),
@@ -84,7 +83,6 @@ export async function POST(request: Request) {
     const salaryRecord = await prisma.salaryRecord.create({
       data: {
         salary,
-        minimumWage: null,
         description,
         period,
         userId: session.user.id,
@@ -96,7 +94,6 @@ export async function POST(request: Request) {
         salaryRecord: {
           ...salaryRecord,
           salary: Number(salaryRecord.salary),
-          minimumWage: salaryRecord.minimumWage !== null ? Number(salaryRecord.minimumWage) : null,
         },
       },
       { status: 201 },

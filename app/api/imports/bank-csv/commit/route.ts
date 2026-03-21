@@ -162,7 +162,6 @@ export async function POST(request: Request) {
             data: incomeRows.map((row) => ({
               userId: session.user.id,
               salary: row.salary,
-              minimumWage: null,
               description: row.description,
               period: row.occurredAt,
               importHash: row.importHash,

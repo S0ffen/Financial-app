@@ -27,19 +27,16 @@ export type AggregateSalaryRecord = {
 }
 
 export type SalaryRecordAvgAggregateOutputType = {
-  minimumWage: runtime.Decimal | null
   salary: runtime.Decimal | null
 }
 
 export type SalaryRecordSumAggregateOutputType = {
-  minimumWage: runtime.Decimal | null
   salary: runtime.Decimal | null
 }
 
 export type SalaryRecordMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  minimumWage: runtime.Decimal | null
   salary: runtime.Decimal | null
   description: string | null
   period: Date | null
@@ -52,7 +49,6 @@ export type SalaryRecordMinAggregateOutputType = {
 export type SalaryRecordMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  minimumWage: runtime.Decimal | null
   salary: runtime.Decimal | null
   description: string | null
   period: Date | null
@@ -65,7 +61,6 @@ export type SalaryRecordMaxAggregateOutputType = {
 export type SalaryRecordCountAggregateOutputType = {
   id: number
   userId: number
-  minimumWage: number
   salary: number
   description: number
   period: number
@@ -78,19 +73,16 @@ export type SalaryRecordCountAggregateOutputType = {
 
 
 export type SalaryRecordAvgAggregateInputType = {
-  minimumWage?: true
   salary?: true
 }
 
 export type SalaryRecordSumAggregateInputType = {
-  minimumWage?: true
   salary?: true
 }
 
 export type SalaryRecordMinAggregateInputType = {
   id?: true
   userId?: true
-  minimumWage?: true
   salary?: true
   description?: true
   period?: true
@@ -103,7 +95,6 @@ export type SalaryRecordMinAggregateInputType = {
 export type SalaryRecordMaxAggregateInputType = {
   id?: true
   userId?: true
-  minimumWage?: true
   salary?: true
   description?: true
   period?: true
@@ -116,7 +107,6 @@ export type SalaryRecordMaxAggregateInputType = {
 export type SalaryRecordCountAggregateInputType = {
   id?: true
   userId?: true
-  minimumWage?: true
   salary?: true
   description?: true
   period?: true
@@ -216,7 +206,6 @@ export type SalaryRecordGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type SalaryRecordGroupByOutputType = {
   id: string
   userId: string
-  minimumWage: runtime.Decimal | null
   salary: runtime.Decimal
   description: string | null
   period: Date | null
@@ -252,7 +241,6 @@ export type SalaryRecordWhereInput = {
   NOT?: Prisma.SalaryRecordWhereInput | Prisma.SalaryRecordWhereInput[]
   id?: Prisma.StringFilter<"SalaryRecord"> | string
   userId?: Prisma.StringFilter<"SalaryRecord"> | string
-  minimumWage?: Prisma.DecimalNullableFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.StringNullableFilter<"SalaryRecord"> | string | null
   period?: Prisma.DateTimeNullableFilter<"SalaryRecord"> | Date | string | null
@@ -266,7 +254,6 @@ export type SalaryRecordWhereInput = {
 export type SalaryRecordOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  minimumWage?: Prisma.SortOrderInput | Prisma.SortOrder
   salary?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   period?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -284,7 +271,6 @@ export type SalaryRecordWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SalaryRecordWhereInput[]
   NOT?: Prisma.SalaryRecordWhereInput | Prisma.SalaryRecordWhereInput[]
   userId?: Prisma.StringFilter<"SalaryRecord"> | string
-  minimumWage?: Prisma.DecimalNullableFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.StringNullableFilter<"SalaryRecord"> | string | null
   period?: Prisma.DateTimeNullableFilter<"SalaryRecord"> | Date | string | null
@@ -297,7 +283,6 @@ export type SalaryRecordWhereUniqueInput = Prisma.AtLeast<{
 export type SalaryRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  minimumWage?: Prisma.SortOrderInput | Prisma.SortOrder
   salary?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   period?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -318,7 +303,6 @@ export type SalaryRecordScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SalaryRecordScalarWhereWithAggregatesInput | Prisma.SalaryRecordScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"SalaryRecord"> | string
   userId?: Prisma.StringWithAggregatesFilter<"SalaryRecord"> | string
-  minimumWage?: Prisma.DecimalNullableWithAggregatesFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalWithAggregatesFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.StringNullableWithAggregatesFilter<"SalaryRecord"> | string | null
   period?: Prisma.DateTimeNullableWithAggregatesFilter<"SalaryRecord"> | Date | string | null
@@ -330,7 +314,6 @@ export type SalaryRecordScalarWhereWithAggregatesInput = {
 
 export type SalaryRecordCreateInput = {
   id?: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -344,7 +327,6 @@ export type SalaryRecordCreateInput = {
 export type SalaryRecordUncheckedCreateInput = {
   id?: string
   userId: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -356,7 +338,6 @@ export type SalaryRecordUncheckedCreateInput = {
 
 export type SalaryRecordUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -370,7 +351,6 @@ export type SalaryRecordUpdateInput = {
 export type SalaryRecordUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -383,7 +363,6 @@ export type SalaryRecordUncheckedUpdateInput = {
 export type SalaryRecordCreateManyInput = {
   id?: string
   userId: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -395,7 +374,6 @@ export type SalaryRecordCreateManyInput = {
 
 export type SalaryRecordUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -408,7 +386,6 @@ export type SalaryRecordUpdateManyMutationInput = {
 export type SalaryRecordUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -431,7 +408,6 @@ export type SalaryRecordOrderByRelationAggregateInput = {
 export type SalaryRecordCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  minimumWage?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   description?: Prisma.SortOrder
   period?: Prisma.SortOrder
@@ -442,14 +418,12 @@ export type SalaryRecordCountOrderByAggregateInput = {
 }
 
 export type SalaryRecordAvgOrderByAggregateInput = {
-  minimumWage?: Prisma.SortOrder
   salary?: Prisma.SortOrder
 }
 
 export type SalaryRecordMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  minimumWage?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   description?: Prisma.SortOrder
   period?: Prisma.SortOrder
@@ -462,7 +436,6 @@ export type SalaryRecordMaxOrderByAggregateInput = {
 export type SalaryRecordMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  minimumWage?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   description?: Prisma.SortOrder
   period?: Prisma.SortOrder
@@ -473,7 +446,6 @@ export type SalaryRecordMinOrderByAggregateInput = {
 }
 
 export type SalaryRecordSumOrderByAggregateInput = {
-  minimumWage?: Prisma.SortOrder
   salary?: Prisma.SortOrder
 }
 
@@ -519,17 +491,8 @@ export type SalaryRecordUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.SalaryRecordScalarWhereInput | Prisma.SalaryRecordScalarWhereInput[]
 }
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
 export type SalaryRecordCreateWithoutUserInput = {
   id?: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -541,7 +504,6 @@ export type SalaryRecordCreateWithoutUserInput = {
 
 export type SalaryRecordUncheckedCreateWithoutUserInput = {
   id?: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -583,7 +545,6 @@ export type SalaryRecordScalarWhereInput = {
   NOT?: Prisma.SalaryRecordScalarWhereInput | Prisma.SalaryRecordScalarWhereInput[]
   id?: Prisma.StringFilter<"SalaryRecord"> | string
   userId?: Prisma.StringFilter<"SalaryRecord"> | string
-  minimumWage?: Prisma.DecimalNullableFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFilter<"SalaryRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.StringNullableFilter<"SalaryRecord"> | string | null
   period?: Prisma.DateTimeNullableFilter<"SalaryRecord"> | Date | string | null
@@ -595,7 +556,6 @@ export type SalaryRecordScalarWhereInput = {
 
 export type SalaryRecordCreateManyUserInput = {
   id?: string
-  minimumWage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary: runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: string | null
   period?: Date | string | null
@@ -607,7 +567,6 @@ export type SalaryRecordCreateManyUserInput = {
 
 export type SalaryRecordUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -619,7 +578,6 @@ export type SalaryRecordUpdateWithoutUserInput = {
 
 export type SalaryRecordUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -631,7 +589,6 @@ export type SalaryRecordUncheckedUpdateWithoutUserInput = {
 
 export type SalaryRecordUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  minimumWage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   salary?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   period?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -646,7 +603,6 @@ export type SalaryRecordUncheckedUpdateManyWithoutUserInput = {
 export type SalaryRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  minimumWage?: boolean
   salary?: boolean
   description?: boolean
   period?: boolean
@@ -660,7 +616,6 @@ export type SalaryRecordSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type SalaryRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  minimumWage?: boolean
   salary?: boolean
   description?: boolean
   period?: boolean
@@ -674,7 +629,6 @@ export type SalaryRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type SalaryRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  minimumWage?: boolean
   salary?: boolean
   description?: boolean
   period?: boolean
@@ -688,7 +642,6 @@ export type SalaryRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type SalaryRecordSelectScalar = {
   id?: boolean
   userId?: boolean
-  minimumWage?: boolean
   salary?: boolean
   description?: boolean
   period?: boolean
@@ -698,7 +651,7 @@ export type SalaryRecordSelectScalar = {
   createdAt?: boolean
 }
 
-export type SalaryRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "minimumWage" | "salary" | "description" | "period" | "importSource" | "importHash" | "externalTransactionId" | "createdAt", ExtArgs["result"]["salaryRecord"]>
+export type SalaryRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "salary" | "description" | "period" | "importSource" | "importHash" | "externalTransactionId" | "createdAt", ExtArgs["result"]["salaryRecord"]>
 export type SalaryRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -717,7 +670,6 @@ export type $SalaryRecordPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    minimumWage: runtime.Decimal | null
     salary: runtime.Decimal
     description: string | null
     period: Date | null
@@ -1151,7 +1103,6 @@ export interface Prisma__SalaryRecordClient<T, Null = never, ExtArgs extends run
 export interface SalaryRecordFieldRefs {
   readonly id: Prisma.FieldRef<"SalaryRecord", 'String'>
   readonly userId: Prisma.FieldRef<"SalaryRecord", 'String'>
-  readonly minimumWage: Prisma.FieldRef<"SalaryRecord", 'Decimal'>
   readonly salary: Prisma.FieldRef<"SalaryRecord", 'Decimal'>
   readonly description: Prisma.FieldRef<"SalaryRecord", 'String'>
   readonly period: Prisma.FieldRef<"SalaryRecord", 'DateTime'>
