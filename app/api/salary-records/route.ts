@@ -1,10 +1,9 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "@/app/src/lib/session";
 import { prisma } from "@/app/src/lib/prisma";
 
 type SalaryRecordPayload = {
   salary: number;
-  minimumWage: number;
   period: string;
   description?: string;
 };
@@ -27,7 +26,7 @@ export async function GET() {
     const normalizedRecords = salaryRecords.map((record) => ({
       id: record.id,
       salary: Number(record.salary),
-      minimumWage: Number(record.minimumWage),
+      minimumWage: record.minimumWage !== null ? Number(record.minimumWage) : null,
       description: record.description,
       period: record.period ? record.period.toISOString() : null,
       createdAt: record.createdAt.toISOString(),
@@ -60,7 +59,6 @@ export async function POST(request: Request) {
 
   // Normalizacja danych do typow, na ktorych operujemy dalej.
   const salary = Number(body.salary);
-  const minimumWage = Number(body.minimumWage);
   const period = new Date(body.period);
   // Normalizujemy opis do przycietego stringa, zeby nie zapisywac samych spacji.
   const description =
@@ -71,10 +69,6 @@ export async function POST(request: Request) {
   // Walidacja danych biznesowych.
   if (!Number.isFinite(salary) || salary <= 0) {
     return NextResponse.json({ error: "Invalid salary" }, { status: 400 });
-  }
-
-  if (!Number.isFinite(minimumWage) || minimumWage <= 0) {
-    return NextResponse.json({ error: "Invalid minimum wage" }, { status: 400 });
   }
 
   if (Number.isNaN(period.getTime())) {
@@ -90,7 +84,7 @@ export async function POST(request: Request) {
     const salaryRecord = await prisma.salaryRecord.create({
       data: {
         salary,
-        minimumWage,
+        minimumWage: null,
         description,
         period,
         userId: session.user.id,
@@ -102,7 +96,7 @@ export async function POST(request: Request) {
         salaryRecord: {
           ...salaryRecord,
           salary: Number(salaryRecord.salary),
-          minimumWage: Number(salaryRecord.minimumWage),
+          minimumWage: salaryRecord.minimumWage !== null ? Number(salaryRecord.minimumWage) : null,
         },
       },
       { status: 201 },

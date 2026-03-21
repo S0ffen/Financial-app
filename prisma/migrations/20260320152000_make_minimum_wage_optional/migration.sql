@@ -1,0 +1,2 @@
+ALTER TABLE "SalaryRecord"
+ALTER COLUMN "minimumWage" DROP NOT NULL;

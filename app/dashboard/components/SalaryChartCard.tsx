@@ -9,14 +9,15 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-type SalaryChartDataPoint = {
-  period: string;
-  salary: number;
-  minimumWage: number;
+type SalaryChartComparison = {
+  currentLabel: string;
+  previousLabel: string;
+  currentTotal: number;
+  previousTotal: number;
 };
 
 type SalaryChartCardProps = {
-  data: SalaryChartDataPoint[];
+  data: SalaryChartComparison;
 };
 
 export default function SalaryChartCard({ data }: SalaryChartCardProps) {
@@ -26,57 +27,53 @@ export default function SalaryChartCard({ data }: SalaryChartCardProps) {
       maximumFractionDigits: 2,
     });
 
-  const latestRecord = data.length ? data[data.length - 1] : null;
-  // Sumujemy wszystkie income entries z wybranego miesiaca, ale minimum wage
-  // traktujemy jako pojedyncza wartosc referencyjna z ostatniego rekordu.
-  const totalSalary = data.reduce((sum, record) => sum + record.salary, 0);
   const chartConfig = {
     amount: {
       label: "Amount",
     },
   } satisfies ChartConfig;
 
-  const percentAboveMinimum =
-    latestRecord && latestRecord.minimumWage > 0
-      ? ((totalSalary - latestRecord.minimumWage) / latestRecord.minimumWage) * 100
-      : null;
+  const percentChange =
+    data.previousTotal > 0 ? ((data.currentTotal - data.previousTotal) / data.previousTotal) * 100 : null;
 
-  const barChartData = latestRecord
-    ? [
-        {
-          label: "Monthly income",
-          amount: totalSalary,
-          fill: "#7fb5ef",
-        },
-        {
-          label: "Minimum wage",
-          amount: latestRecord.minimumWage,
-          fill: "#5f91c7",
-        },
-      ]
-    : [];
+  const barChartData = [
+    {
+      label: data.previousLabel,
+      amount: data.previousTotal,
+      fill: "#5f91c7",
+    },
+    {
+      label: data.currentLabel,
+      amount: data.currentTotal,
+      fill: "#7fb5ef",
+    },
+  ];
 
   return (
     <Card className="rounded-2xl border-zinc-800 bg-gradient-to-b from-zinc-950 to-zinc-900/80 text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <CardHeader className="pb-4">
         <div>
-          <CardTitle className="text-2xl font-semibold text-zinc-100">Salary Overview</CardTitle>
+          <CardTitle className="text-2xl font-semibold text-zinc-100">Income Overview</CardTitle>
           <CardDescription className="mt-1 text-zinc-400">
-            Comparison of your salary against the minimum wage.
+            Comparison of the selected month income against the previous month.
           </CardDescription>
         </div>
-        {percentAboveMinimum !== null ? (
+        {percentChange !== null ? (
           <p className="mx-auto mt-3 w-full rounded-md border border-zinc-700 bg-zinc-900/70 px-3 py-1 text-center text-sm font-semibold text-zinc-100 sm:max-w-[60%]">
-            {percentAboveMinimum >= 0 ? "+" : ""}
-            {percentAboveMinimum.toFixed(1)}% vs minimum
+            {percentChange >= 0 ? "+" : ""}
+            {percentChange.toFixed(1)}% vs previous month
           </p>
-        ) : null}
+        ) : (
+          <p className="mx-auto mt-3 w-full rounded-md border border-zinc-700 bg-zinc-900/70 px-3 py-1 text-center text-sm font-semibold text-zinc-100 sm:max-w-[60%]">
+            No previous month data
+          </p>
+        )}
       </CardHeader>
 
       <CardContent>
         <div className="flex h-[280px] items-center justify-center rounded-xl border border-zinc-800/80 bg-zinc-950/60 p-3">
-          {data.length === 0 ? (
-            <p className="text-sm text-zinc-400">No salary data for selected period.</p>
+          {barChartData.every((entry) => entry.amount === 0) ? (
+            <p className="text-sm text-zinc-400">No income data for selected period.</p>
           ) : (
             <ChartContainer
               config={chartConfig}

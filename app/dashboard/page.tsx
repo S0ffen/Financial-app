@@ -6,10 +6,11 @@ import MonthFilter from "./components/MonthFilter";
 import MonthlySummaryCards from "./components/MonthlySummaryCards";
 import SalaryChartCard from "./components/SalaryChartCard";
 
-type SalaryChartDataPoint = {
-  period: string;
-  salary: number;
-  minimumWage: number;
+type SalaryChartComparison = {
+  currentLabel: string;
+  previousLabel: string;
+  currentTotal: number;
+  previousTotal: number;
 };
 
 type SavingsSummary = {
@@ -17,46 +18,73 @@ type SavingsSummary = {
   expenses: number;
 };
 
-async function getSalaryChartData(
+async function getSalaryChartComparison(
   userId: string,
-  start: Date,
-  end: Date,
-): Promise<SalaryChartDataPoint[]> {
+  selectedMonthStart: Date,
+  nextMonthStart: Date,
+): Promise<SalaryChartComparison> {
+  const previousMonthStart = new Date(
+    selectedMonthStart.getFullYear(),
+    selectedMonthStart.getMonth() - 1,
+    1,
+    0,
+    0,
+    0,
+  );
+
   const salaryRecords = await prisma.salaryRecord.findMany({
     where: {
       userId,
-      period: { gte: start, lt: end },
+      period: { gte: previousMonthStart, lt: nextMonthStart },
     },
     orderBy: { period: "asc" },
   });
 
-  return salaryRecords.map((record) => ({
-    period: (record.period ?? record.createdAt).toISOString(),
-    salary: Number(record.salary),
-    minimumWage: Number(record.minimumWage),
-  }));
+  const currentTotal = salaryRecords
+    .filter((record) => {
+      const periodDate = record.period ?? record.createdAt;
+      return periodDate >= selectedMonthStart && periodDate < nextMonthStart;
+    })
+    .reduce((sum, record) => sum + Number(record.salary), 0);
+
+  const previousTotal = salaryRecords
+    .filter((record) => {
+      const periodDate = record.period ?? record.createdAt;
+      return periodDate >= previousMonthStart && periodDate < selectedMonthStart;
+    })
+    .reduce((sum, record) => sum + Number(record.salary), 0);
+
+  const labelFormatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+
+  // Zwracamy gotowe podsumowanie wybranego miesiaca kontra poprzedni,
+  // zeby karta nie musiala sama odtwarzac logiki zakresow dat.
+  return {
+    currentLabel: labelFormatter.format(selectedMonthStart),
+    previousLabel: labelFormatter.format(previousMonthStart),
+    currentTotal: Number(currentTotal.toFixed(2)),
+    previousTotal: Number(previousTotal.toFixed(2)),
+  };
 }
 
 function getSavingsSummary(
-  salaryData: SalaryChartDataPoint[],
+  incomeTotal: number,
   userExpenses: Array<{ amount: unknown }>,
 ): SavingsSummary {
-  const income = salaryData.reduce((sum, record) => sum + record.salary, 0);
-
   const expenses = userExpenses.reduce((sum, expense) => {
     const parsedAmount = Number(expense.amount);
     return Number.isFinite(parsedAmount) ? sum + parsedAmount : sum;
   }, 0);
 
   return {
-    income: Number(income.toFixed(2)),
+    income: Number(incomeTotal.toFixed(2)),
     expenses: Number(expenses.toFixed(2)),
   };
 }
 
-function getSingleSearchParam(
-  value: string | string[] | undefined,
-): string | undefined {
+function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
@@ -96,7 +124,7 @@ export default async function DashboardPage({
   const start = new Date(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
   const end = new Date(selectedYear, selectedMonth, 1, 0, 0, 0);
 
-  const [userExpenses, salaryChartData] = await Promise.all([
+  const [userExpenses, salaryComparison] = await Promise.all([
     prisma.expense.findMany({
       where: {
         userId: session.user.id,
@@ -104,7 +132,7 @@ export default async function DashboardPage({
       },
       orderBy: { spentAt: "desc" },
     }),
-    getSalaryChartData(session.user.id, start, end),
+    getSalaryChartComparison(session.user.id, start, end),
   ]);
 
   const userExpensesByCategory = userExpenses.reduce<Record<string, number>>((acc, expense) => {
@@ -122,16 +150,19 @@ export default async function DashboardPage({
     amount: Number(amount.toFixed(2)),
   }));
 
-  const savingsSummary = getSavingsSummary(salaryChartData, userExpenses);
+  const savingsSummary = getSavingsSummary(salaryComparison.currentTotal, userExpenses);
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
+    <main
+      style={{ backgroundImage: "url('dashboard.jpg')" }}
+      className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6"
+    >
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
       <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />
       <MonthlySummaryCards income={savingsSummary.income} expenses={savingsSummary.expenses} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <SalaryChartCard data={salaryChartData} />
+        <SalaryChartCard data={salaryComparison} />
         <ExpensesBarChart data={expensesBarChartData} />
       </div>
     </main>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Pencil } from "lucide-react";
@@ -21,7 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 type EditIncomeDialogProps = {
   recordId: string;
   salary: number;
-  minimumWage: number;
   description: string | null;
   period: string;
 };
@@ -29,7 +28,6 @@ type EditIncomeDialogProps = {
 export default function EditIncomeDialog({
   recordId,
   salary,
-  minimumWage,
   description,
   period,
 }: EditIncomeDialogProps) {
@@ -37,7 +35,6 @@ export default function EditIncomeDialog({
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [salaryValue, setSalaryValue] = useState(salary.toFixed(2));
-  const [minimumWageValue, setMinimumWageValue] = useState(minimumWage.toFixed(2));
   // Trzymamy opis w osobnym stanie, zeby dialog edycji mial pelny prefill rekordu.
   const [descriptionValue, setDescriptionValue] = useState(description ?? "");
   const [periodValue, setPeriodValue] = useState(period);
@@ -46,7 +43,6 @@ export default function EditIncomeDialog({
   // zeby dialog zawsze startowal od aktualnych wartosci z bazy.
   const resetFormValues = () => {
     setSalaryValue(salary.toFixed(2));
-    setMinimumWageValue(minimumWage.toFixed(2));
     setDescriptionValue(description ?? "");
     setPeriodValue(period);
   };
@@ -69,7 +65,6 @@ export default function EditIncomeDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           salary: Number(salaryValue),
-          minimumWage: Number(minimumWageValue),
           description: descriptionValue,
           period: periodValue,
         }),
@@ -127,23 +122,6 @@ export default function EditIncomeDialog({
               inputMode="decimal"
               value={salaryValue}
               onChange={(event) => setSalaryValue(event.target.value)}
-              className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor={`minimum-wage-${recordId}`} className="text-zinc-100">
-              Minimum wage
-            </Label>
-            <Input
-              id={`minimum-wage-${recordId}`}
-              type="number"
-              step="0.01"
-              min="0"
-              inputMode="decimal"
-              value={minimumWageValue}
-              onChange={(event) => setMinimumWageValue(event.target.value)}
               className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
               required
             />

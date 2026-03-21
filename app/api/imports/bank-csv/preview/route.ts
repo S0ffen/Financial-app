@@ -31,23 +31,11 @@ export async function POST(request: Request) {
     const csvText = decodeIngCsvBuffer(csvBuffer);
     const parsed = parseIngBankCsv(csvText);
 
-    const latestMinimumWageRecord = await prisma.salaryRecord.findFirst({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: [{ period: "desc" }, { createdAt: "desc" }],
-      select: {
-        minimumWage: true,
-      },
-    });
-    const fallbackMinimumWage = latestMinimumWageRecord ? Number(latestMinimumWageRecord.minimumWage) : null;
-
     const previewRowsBase = parsed.rows.map((row, index) => {
       const importHash = buildBankImportHash(session.user.id, row);
 
       return {
         ...row,
-        minimumWage: row.kind === "income" ? fallbackMinimumWage : null,
         previewId: `${importHash}:${index}`,
         importSource: "ing_csv" as const,
         importHash,
@@ -94,14 +82,6 @@ export async function POST(request: Request) {
         };
       }
 
-      if (row.kind === "income" && (!Number.isFinite(row.minimumWage) || Number(row.minimumWage) <= 0)) {
-        return {
-          ...row,
-          duplicate: false,
-          validationStatus: "needs_review",
-          validationMessage: "Set minimum wage for imported income before saving.",
-        };
-      }
 
       return {
         ...row,

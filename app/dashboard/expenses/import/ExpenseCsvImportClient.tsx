@@ -26,7 +26,6 @@ type PreviewRow = {
   spentAt: string;
   description: string;
   suggestedCategory: ExpenseCategory | null;
-  minimumWage: number | null;
   matchedRuleId: string | null;
   matchedKeyword: string | null;
   duplicate: boolean;
@@ -49,6 +48,31 @@ type PreviewResponse = {
   rows: Array<Omit<PreviewRow, "include">>;
 };
 
+function resolvePreviewStatus(row: PreviewRow): Pick<PreviewRow, "validationStatus" | "validationMessage" | "include"> {
+  if (row.duplicate) {
+    return {
+      validationStatus: "duplicate",
+      validationMessage: "This transaction was already imported.",
+      include: false,
+    };
+  }
+
+  if (row.kind === "expense" && row.suggestedCategory === "Uncategorized") {
+    return {
+      validationStatus: "needs_review",
+      validationMessage: "Category could not be matched automatically.",
+      include: false,
+    };
+  }
+
+
+  return {
+    validationStatus: "ready",
+    validationMessage: null,
+    include: true,
+  };
+}
+
 export default function ExpenseCsvImportClient() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -63,8 +87,7 @@ export default function ExpenseCsvImportClient() {
       selectedRows: rows.filter((row) => row.include).length,
       selectedExpenseRows: rows.filter((row) => row.include && row.kind === "expense").length,
       selectedIncomeRows: rows.filter((row) => row.include && row.kind === "income").length,
-      duplicateRows: rows.filter((row) => row.duplicate).length,
-      reviewRows: rows.filter((row) => row.validationStatus === "needs_review" && row.include).length,
+      reviewRows: rows.filter((row) => row.validationStatus === "needs_review").length,
       selectedExpenseAmount: rows
         .filter((row) => row.include && row.kind === "expense")
         .reduce((sum, row) => sum + row.amount, 0),
@@ -74,6 +97,8 @@ export default function ExpenseCsvImportClient() {
     };
   }, [rows]);
 
+  const reviewRows = useMemo(() => rows.filter((row) => row.validationStatus === "needs_review"), [rows]);
+
   const updateRow = (previewId: string, patch: Partial<PreviewRow>) => {
     setRows((currentRows) =>
       currentRows.map((row) => {
@@ -82,35 +107,13 @@ export default function ExpenseCsvImportClient() {
         }
 
         const updatedRow = { ...row, ...patch };
-
-        // Po lokalnej edycji przeliczamy status row, zeby user od razu widzial czy rekord jest gotowy.
-        if (updatedRow.duplicate) {
-          return updatedRow;
-        }
-
-        if (updatedRow.kind === "expense" && updatedRow.suggestedCategory === "Uncategorized") {
-          return {
-            ...updatedRow,
-            validationStatus: "needs_review",
-            validationMessage: "Category could not be matched automatically.",
-          };
-        }
-
-        if (
-          updatedRow.kind === "income" &&
-          (!Number.isFinite(updatedRow.minimumWage) || Number(updatedRow.minimumWage) <= 0)
-        ) {
-          return {
-            ...updatedRow,
-            validationStatus: "needs_review",
-            validationMessage: "Set minimum wage for imported income before saving.",
-          };
-        }
+        const nextStatus = resolvePreviewStatus(updatedRow);
 
         return {
           ...updatedRow,
-          validationStatus: "ready",
-          validationMessage: null,
+          validationStatus: nextStatus.validationStatus,
+          validationMessage: nextStatus.validationMessage,
+          include: nextStatus.validationStatus === "ready" ? true : updatedRow.include && nextStatus.validationStatus !== "needs_review",
         };
       }),
     );
@@ -143,7 +146,17 @@ export default function ExpenseCsvImportClient() {
 
       setFileName(payload.fileName);
       setServerSummary(payload.summary);
-      setRows(payload.rows.map((row) => ({ ...row, include: !row.duplicate })));
+      setRows(
+        payload.rows.map((row) => {
+          const nextStatus = resolvePreviewStatus({ ...row, include: false });
+          return {
+            ...row,
+            include: nextStatus.include,
+            validationStatus: nextStatus.validationStatus,
+            validationMessage: nextStatus.validationMessage,
+          };
+        }),
+      );
       toast.success("CSV preview generated.");
     } catch (error) {
       console.error(error);
@@ -211,7 +224,7 @@ export default function ExpenseCsvImportClient() {
         <div>
           <h1 className="text-2xl font-semibold text-zinc-100">Import bank CSV</h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Upload an ING CSV file, review detected expenses and salary transfers, then import only the rows you want.
+            Upload an ING CSV file, fix only the rows that need review, then import all ready transactions.
           </p>
         </div>
         <Link
@@ -264,7 +277,7 @@ export default function ExpenseCsvImportClient() {
           <SummaryCard label="Income" value={String(serverSummary.incomeRows)} />
           <SummaryCard label="Ignored" value={String(serverSummary.ignoredRows)} />
           <SummaryCard label="Duplicates" value={String(serverSummary.duplicateRows)} />
-          <SummaryCard label="Needs review" value={String(rows.filter((row) => row.validationStatus === "needs_review").length)} />
+          <SummaryCard label="Needs review" value={String(derivedSummary.reviewRows)} />
           <SummaryCard
             label="Selected total"
             value={`${derivedSummary.selectedExpenseAmount.toFixed(2)} out / ${derivedSummary.selectedIncomeAmount.toFixed(2)} in`}
@@ -278,7 +291,7 @@ export default function ExpenseCsvImportClient() {
             <div>
               <CardTitle>Preview{fileName ? `: ${fileName}` : ""}</CardTitle>
               <CardDescription className="text-zinc-400">
-                Review categories, descriptions, dates and minimum wage values before saving imported transactions.
+                Only rows that still need review are shown below. Ready rows are already selected for import.
               </CardDescription>
             </div>
             <Button onClick={handleCommit} disabled={isCommitLoading} className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
@@ -286,15 +299,15 @@ export default function ExpenseCsvImportClient() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
-            {rows.map((row) => {
+            {reviewRows.length === 0 ? (
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-200">
+                No rows require manual review. You can import the ready transactions now.
+              </div>
+            ) : null}
+
+            {reviewRows.map((row) => {
               const statusClass =
-                row.duplicate
-                  ? "border-zinc-700 bg-zinc-900/40"
-                  : row.validationStatus === "needs_review"
-                    ? "border-amber-500/40 bg-amber-500/5"
-                    : row.kind === "income"
-                      ? "border-sky-500/20 bg-sky-500/5"
-                      : "border-emerald-500/20 bg-zinc-950/60";
+                row.kind === "income" ? "border-sky-500/20 bg-sky-500/5" : "border-amber-500/40 bg-amber-500/5";
 
               return (
                 <article key={row.previewId} className={`rounded-xl border p-4 ${statusClass}`}>
@@ -305,17 +318,13 @@ export default function ExpenseCsvImportClient() {
                           <input
                             type="checkbox"
                             checked={row.include}
-                            disabled={row.duplicate}
                             onChange={(event) => updateRow(row.previewId, { include: event.target.checked })}
                             className="h-4 w-4 rounded border-zinc-600 bg-zinc-900"
                           />
-                          Include row
+                          Include row after fix
                         </label>
-                        <StatusBadge label={row.kind === "income" ? "Income" : "Expense"} tone={row.kind === "income" ? "sky" : "emerald"} />
-                        <StatusBadge
-                          label={row.duplicate ? "Duplicate" : row.validationStatus === "needs_review" ? "Needs review" : "Ready"}
-                          tone={row.duplicate ? "zinc" : row.validationStatus === "needs_review" ? "amber" : row.kind === "income" ? "sky" : "emerald"}
-                        />
+                        <StatusBadge label={row.kind === "income" ? "Income" : "Expense"} tone={row.kind === "income" ? "sky" : "amber"} />
+                        <StatusBadge label="Needs review" tone="amber" />
                         {row.kind === "expense" && row.matchedKeyword ? <StatusBadge label={`Rule: ${row.matchedKeyword}`} tone="sky" /> : null}
                       </div>
 
@@ -325,9 +334,11 @@ export default function ExpenseCsvImportClient() {
                       </div>
 
                       <div className={`grid gap-3 ${row.kind === "income" ? "md:grid-cols-2 xl:grid-cols-[180px_170px_170px_minmax(0,1fr)]" : "md:grid-cols-2 xl:grid-cols-[180px_170px_minmax(0,1fr)]"}`}>
-                        {row.kind === "expense" ? (
-                          <div className="space-y-1">
-                            <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Category</label>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                            {row.kind === "expense" ? "Category" : "Type"}
+                          </label>
+                          {row.kind === "expense" ? (
                             <select
                               value={row.suggestedCategory ?? "Uncategorized"}
                               onChange={(event) => {
@@ -344,21 +355,14 @@ export default function ExpenseCsvImportClient() {
                                 </option>
                               ))}
                             </select>
-                          </div>
-                        ) : (
-                          <div className="space-y-1">
-                            <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Minimum wage</label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={row.minimumWage ?? ""}
-                              onChange={(event) => updateRow(row.previewId, { minimumWage: event.target.value ? Number(event.target.value) : null })}
-                              className="border-zinc-700 bg-zinc-900/60 text-zinc-100"
-                            />
-                          </div>
-                        )}
+                          ) : (
+                            <div className="flex h-10 items-center rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-sky-200">
+                              Income
+                            </div>
+                          )}
+                        </div>
 
-                        <div className="space-y-1">
+                                                <div className="space-y-1">
                           <label className="text-xs font-medium uppercase tracking-wide text-zinc-400">Date</label>
                           <Input
                             type="date"
@@ -413,18 +417,14 @@ function SummaryCard({ label, value }: SummaryCardProps) {
 
 type StatusBadgeProps = {
   label: string;
-  tone: "emerald" | "amber" | "zinc" | "sky";
+  tone: "amber" | "sky";
 };
 
 function StatusBadge({ label, tone }: StatusBadgeProps) {
   const toneClass =
-    tone === "emerald"
-      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-      : tone === "amber"
-        ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
-        : tone === "sky"
-          ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
-          : "border-zinc-700 bg-zinc-900 text-zinc-300";
+    tone === "amber"
+      ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+      : "border-sky-500/30 bg-sky-500/10 text-sky-200";
 
   return <span className={`rounded-full border px-2 py-1 text-xs font-medium ${toneClass}`}>{label}</span>;
 }

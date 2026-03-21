@@ -30,34 +30,73 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Select at least one row to import." }, { status: 400 });
   }
 
-  const normalizedRows = includedRows.map((row) => {
-    const amount = Number(row.amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error(`Invalid amount for row ${row.previewId}`);
-    }
+  let normalizedRows:
+    | Array<
+        | {
+            kind: "expense";
+            category: string;
+            amount: number;
+            currency: string;
+            description: string;
+            occurredAt: Date;
+            importHash: string;
+            importSource: "ing_csv";
+            externalTransactionId: string | null;
+          }
+        | {
+            kind: "income";
+            salary: number;
+            currency: string;
+            description: string;
+            occurredAt: Date;
+            importHash: string;
+            importSource: "ing_csv";
+            externalTransactionId: string | null;
+          }
+      >;
 
-    const occurredAt = new Date(row.spentAt);
-    if (Number.isNaN(occurredAt.getTime())) {
-      throw new Error(`Invalid date for row ${row.previewId}`);
-    }
+  try {
+    // Normalizujemy i walidujemy payload przed jakimkolwiek zapisem do bazy.
+    normalizedRows = includedRows.map((row) => {
+      const amount = Number(row.amount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error(`Invalid amount for row ${row.previewId}`);
+      }
 
-    const description = typeof row.description === "string" ? row.description.trim() : "";
-    if (description.length > 300) {
-      throw new Error(`Description is too long for row ${row.previewId}`);
-    }
+      const occurredAt = new Date(row.spentAt);
+      if (Number.isNaN(occurredAt.getTime())) {
+        throw new Error(`Invalid date for row ${row.previewId}`);
+      }
 
-    const importHash = buildBankImportHash(session.user.id, row);
+      const description = typeof row.description === "string" ? row.description.trim() : "";
+      if (description.length > 300) {
+        throw new Error(`Description is too long for row ${row.previewId}`);
+      }
 
-    if (row.kind === "expense") {
-      const category = parseExpenseCategory(row.suggestedCategory);
-      if (!category) {
-        throw new Error(`Invalid category for row ${row.previewId}`);
+      const importHash = buildBankImportHash(session.user.id, row);
+
+      if (row.kind === "expense") {
+        const category = parseExpenseCategory(row.suggestedCategory);
+        if (!category) {
+          throw new Error(`Invalid category for row ${row.previewId}`);
+        }
+
+        return {
+          kind: "expense" as const,
+          category,
+          amount,
+          currency: row.currency,
+          description: description || row.counterparty.trim(),
+          occurredAt,
+          importHash,
+          importSource: "ing_csv" as const,
+          externalTransactionId: row.externalTransactionId,
+        };
       }
 
       return {
-        kind: "expense" as const,
-        category,
-        amount,
+        kind: "income" as const,
+        salary: amount,
         currency: row.currency,
         description: description || row.counterparty.trim(),
         occurredAt,
@@ -65,25 +104,11 @@ export async function POST(request: Request) {
         importSource: "ing_csv" as const,
         externalTransactionId: row.externalTransactionId,
       };
-    }
-
-    const minimumWage = Number(row.minimumWage);
-    if (!Number.isFinite(minimumWage) || minimumWage <= 0) {
-      throw new Error(`Invalid minimum wage for row ${row.previewId}`);
-    }
-
-    return {
-      kind: "income" as const,
-      salary: amount,
-      minimumWage,
-      currency: row.currency,
-      description: description || row.counterparty.trim(),
-      occurredAt,
-      importHash,
-      importSource: "ing_csv" as const,
-      externalTransactionId: row.externalTransactionId,
-    };
-  });
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid import payload.";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 
   const hashes = normalizedRows.map((row) => row.importHash);
   const [existingExpenses, existingIncome] = await Promise.all([
@@ -137,7 +162,7 @@ export async function POST(request: Request) {
             data: incomeRows.map((row) => ({
               userId: session.user.id,
               salary: row.salary,
-              minimumWage: row.minimumWage,
+              minimumWage: null,
               description: row.description,
               period: row.occurredAt,
               importHash: row.importHash,

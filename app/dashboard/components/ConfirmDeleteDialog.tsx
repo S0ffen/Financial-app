@@ -19,6 +19,7 @@ type ConfirmDeleteDialogProps = {
   isLoading: boolean;
   triggerAriaLabel: string;
   triggerTitle: string;
+  triggerLabel?: string;
   onConfirm: () => void;
 };
 
@@ -28,20 +29,33 @@ export default function ConfirmDeleteDialog({
   isLoading,
   triggerAriaLabel,
   triggerTitle,
+  triggerLabel,
   onConfirm,
 }: ConfirmDeleteDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button
-          type="button"
-          disabled={isLoading}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label={triggerAriaLabel}
-          title={triggerTitle}
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        {triggerLabel ? (
+          <button
+            type="button"
+            disabled={isLoading}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 px-4 text-sm font-medium text-red-200 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={triggerAriaLabel}
+            title={triggerTitle}
+          >
+            {triggerLabel}
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={isLoading}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={triggerAriaLabel}
+            title={triggerTitle}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-md">

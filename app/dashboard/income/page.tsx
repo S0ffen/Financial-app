@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { HandCoins } from "lucide-react";
 import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
@@ -118,7 +118,7 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
 
                   <div className="min-w-0 flex-1">
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1">
-                      <p className="truncate text-lg font-medium text-zinc-100">Salary</p>
+                      <p className="truncate text-lg font-medium text-zinc-100">Income</p>
                       <p className="text-right text-lg font-semibold tabular-nums text-emerald-300">
                         {amountFormatter.format(Number(record.salary))} PLN
                       </p>
@@ -129,11 +129,6 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
                       <p className="text-right text-sm tabular-nums text-zinc-400">
                         {dateFormatter.format(periodDate)}
                       </p>
-
-                      <p className="truncate text-sm text-zinc-400">
-                        Minimum wage: {amountFormatter.format(Number(record.minimumWage))} PLN
-                      </p>
-                      <div />
                     </div>
                   </div>
 
@@ -141,7 +136,6 @@ export default async function IncomePage({ searchParams }: IncomePageProps) {
                     <EditIncomeDialog
                       recordId={record.id}
                       salary={Number(record.salary)}
-                      minimumWage={Number(record.minimumWage)}
                       description={record.description}
                       period={periodDate.toISOString().slice(0, 10)}
                     />

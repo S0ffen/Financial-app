@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "@/app/src/lib/session";
 import { prisma } from "@/app/src/lib/prisma";
 
@@ -17,14 +17,12 @@ export async function PATCH(request: Request, context: RouteContext) {
   const body = (await request.json().catch(() => null)) as
     | {
         salary?: unknown;
-        minimumWage?: unknown;
         period?: unknown;
         description?: unknown;
       }
     | null;
 
   const salary = Number(body?.salary);
-  const minimumWage = Number(body?.minimumWage);
   const period = new Date(String(body?.period ?? ""));
   // Normalizujemy opis do przycietego stringa, zeby update nie zapisywal pustych spacji.
   const description =
@@ -35,10 +33,6 @@ export async function PATCH(request: Request, context: RouteContext) {
   // Walidujemy payload przed update, zeby nie zapisac pustych albo blednych danych.
   if (!Number.isFinite(salary) || salary <= 0) {
     return NextResponse.json({ error: "Invalid salary" }, { status: 400 });
-  }
-
-  if (!Number.isFinite(minimumWage) || minimumWage <= 0) {
-    return NextResponse.json({ error: "Invalid minimum wage" }, { status: 400 });
   }
 
   if (Number.isNaN(period.getTime())) {
@@ -58,7 +52,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
       data: {
         salary,
-        minimumWage,
         description,
         period,
       },
