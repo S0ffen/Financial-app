@@ -6,6 +6,7 @@ const HEADER_PREFIX = '"Data transakcji"';
 const AMOUNT_INDEX_CANDIDATES = [8, 10, 12] as const;
 const CURRENCY_INDEX_CANDIDATES = [9, 11, 13] as const;
 const INCOME_KEYWORDS = ["WYNAGRODZEN", "WYPLATA", "PENSJ", "SALARY", "PAYROLL"];
+const INTERNAL_TRANSFER_KEYWORDS = ["PRZELEW WŁASNY", "PRZELEW WLASNE", "TRANSFER WEWNETRZNY"];
 
 export type ParsedIngCsvRow = {
   kind: "expense" | "income";
@@ -192,12 +193,25 @@ function isSalaryLikeIncome(counterparty: string, title: string, details: string
   return INCOME_KEYWORDS.some((keyword) => haystack.includes(keyword));
 }
 
+// Pomijamy przelewy wlasne, bo nie sa realnym wydatkiem ani przychodem do sledzenia.
+function isInternalTransfer(counterparty: string, title: string, details: string): boolean {
+  const haystack = normalizeImportText(`${counterparty} ${title} ${details}`);
+  return INTERNAL_TRANSFER_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
 // Hash zawiera typ rekordu i userId, zeby import byl idempotentny per user i per kolekcja danych.
 export function buildBankImportHash(
   userId: string,
   row: Pick<
     ParsedIngCsvRow,
-    "kind" | "spentAt" | "amount" | "currency" | "counterparty" | "title" | "details" | "accountName"
+    | "kind"
+    | "spentAt"
+    | "amount"
+    | "currency"
+    | "counterparty"
+    | "title"
+    | "details"
+    | "accountName"
   >,
 ): string {
   const payload = [
@@ -252,6 +266,10 @@ export function parseIngBankCsv(csvText: string): ParsedIngCsvResult {
     }
 
     const description = buildImportDescription(counterparty, title);
+
+    if (isInternalTransfer(counterparty, title, details)) {
+      continue;
+    }
 
     if (amount < 0) {
       expenseRows += 1;

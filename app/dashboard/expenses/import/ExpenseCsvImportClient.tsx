@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,6 +99,11 @@ export default function ExpenseCsvImportClient() {
   }, [rows]);
 
   const reviewRows = useMemo(() => rows.filter((row) => row.validationStatus === "needs_review"), [rows]);
+
+  // Usuwamy wiersz z lokalnego preview, zeby nie byl juz widoczny ani wyslany do importu.
+  const dropRow = (previewId: string) => {
+    setRows((currentRows) => currentRows.filter((row) => row.previewId !== previewId));
+  };
 
   const updateRow = (previewId: string, patch: Partial<PreviewRow>) => {
     setRows((currentRows) =>
@@ -282,6 +288,7 @@ export default function ExpenseCsvImportClient() {
             label="Selected total"
             value={`${derivedSummary.selectedExpenseAmount.toFixed(2)} out / ${derivedSummary.selectedIncomeAmount.toFixed(2)} in`}
           />
+          <SummaryCard label="Preview rows left" value={String(rows.length)} />
         </section>
       ) : null}
 
@@ -314,6 +321,16 @@ export default function ExpenseCsvImportClient() {
                   <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => dropRow(row.previewId)}
+                          className="h-8 border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 hover:text-zinc-50"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Drop row
+                        </Button>
                         <label className="inline-flex items-center gap-2 text-sm font-medium text-zinc-100">
                           <input
                             type="checkbox"

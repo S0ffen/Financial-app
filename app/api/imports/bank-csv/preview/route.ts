@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/src/lib/prisma";
 import { getServerSession } from "@/app/src/lib/session";
-import { buildBankImportHash, decodeIngCsvBuffer, parseIngBankCsv, type ParsedIngCsvRow } from "@/lib/import/bankCsv/ing";
+import { buildBankImportHash, decodeIngCsvBuffer, normalizeImportText, parseIngBankCsv, type ParsedIngCsvRow } from "@/lib/import/bankCsv/ing";
 
 type PreviewRow = ParsedIngCsvRow & {
   previewId: string;
@@ -11,6 +11,74 @@ type PreviewRow = ParsedIngCsvRow & {
   validationStatus: "ready" | "needs_review" | "duplicate";
   validationMessage: string | null;
 };
+
+type HistoricalCategoryMatch = {
+  category: string;
+  sourceDescription: string;
+};
+
+function buildCategoryLookupKeys(value: string): string[] {
+  const keys = new Set<string>();
+  const normalizedValue = normalizeImportText(value);
+
+  if (normalizedValue) {
+    keys.add(normalizedValue);
+  }
+
+  const primaryPart = value.split(" - ")[0]?.trim();
+  if (primaryPart && primaryPart !== value) {
+    const normalizedPrimaryPart = normalizeImportText(primaryPart);
+    if (normalizedPrimaryPart) {
+      keys.add(normalizedPrimaryPart);
+    }
+  }
+
+  return [...keys];
+}
+
+// Budujemy lookup z poprzednich wydatkow usera, zeby preview korzystal z jego wczesniejszych recznych kategoryzacji.
+function buildHistoricalCategoryLookup(
+  expenses: Array<{ category: string; description: string | null }>,
+): Map<string, HistoricalCategoryMatch> {
+  const lookup = new Map<string, HistoricalCategoryMatch>();
+
+  for (const expense of expenses) {
+    if (!expense.description) {
+      continue;
+    }
+
+    for (const key of buildCategoryLookupKeys(expense.description)) {
+      if (!lookup.has(key)) {
+        lookup.set(key, {
+          category: expense.category,
+          sourceDescription: expense.description,
+        });
+      }
+    }
+  }
+
+  return lookup;
+}
+
+function findHistoricalCategory(
+  row: Pick<ParsedIngCsvRow, "description" | "counterparty" | "title">,
+  lookup: Map<string, HistoricalCategoryMatch>,
+): HistoricalCategoryMatch | null {
+  const candidateKeys = new Set<string>([
+    ...buildCategoryLookupKeys(row.description),
+    ...buildCategoryLookupKeys(row.counterparty),
+    ...buildCategoryLookupKeys(`${row.counterparty} - ${row.title}`),
+  ]);
+
+  for (const key of candidateKeys) {
+    const match = lookup.get(key);
+    if (match) {
+      return match;
+    }
+  }
+
+  return null;
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession();
@@ -43,7 +111,7 @@ export async function POST(request: Request) {
     });
 
     const uniqueHashes = [...new Set(previewRowsBase.map((row) => row.importHash))];
-    const [existingExpenses, existingIncome] = await Promise.all([
+    const [existingExpenses, existingIncome, previousCategorizedExpenses] = await Promise.all([
       uniqueHashes.length
         ? prisma.expense.findMany({
             where: { importHash: { in: uniqueHashes } },
@@ -56,11 +124,24 @@ export async function POST(request: Request) {
             select: { importHash: true },
           })
         : Promise.resolve([]),
+      prisma.expense.findMany({
+        where: {
+          userId: session.user.id,
+          category: { not: "Uncategorized" },
+        },
+        orderBy: { spentAt: "desc" },
+        take: 2000,
+        select: {
+          category: true,
+          description: true,
+        },
+      }),
     ]);
 
     const existingHashSet = new Set(
       [...existingExpenses, ...existingIncome].map((record) => record.importHash).filter(Boolean),
     );
+    const historicalCategoryLookup = buildHistoricalCategoryLookup(previousCategorizedExpenses);
 
     // Preview pokazuje duplikaty i wiersze wymagajace review jeszcze przed zapisem do bazy.
     const previewRows: PreviewRow[] = previewRowsBase.map((row) => {
@@ -74,6 +155,18 @@ export async function POST(request: Request) {
       }
 
       if (row.kind === "expense" && row.suggestedCategory === "Uncategorized") {
+        const historicalMatch = findHistoricalCategory(row, historicalCategoryLookup);
+
+        if (historicalMatch) {
+          return {
+            ...row,
+            suggestedCategory: historicalMatch.category as PreviewRow["suggestedCategory"],
+            duplicate: false,
+            validationStatus: "ready",
+            validationMessage: `Matched from your previous category: ${historicalMatch.sourceDescription}`,
+          };
+        }
+
         return {
           ...row,
           duplicate: false,
@@ -81,7 +174,6 @@ export async function POST(request: Request) {
           validationMessage: "Category could not be matched automatically.",
         };
       }
-
 
       return {
         ...row,
