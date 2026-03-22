@@ -2,8 +2,31 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type AuthMode = "sign-in" | "sign-up";
+
+type BetterAuthErrorPayload = {
+  code?: string;
+  message?: string;
+};
+
+// Zamieniamy surowe bledy Better Auth na krotkie komunikaty przyjazne dla usera.
+function mapAuthError(payload: BetterAuthErrorPayload | null, mode: AuthMode): string {
+  if (!payload) {
+    return mode === "sign-up" ? "Could not create account." : "Could not sign in.";
+  }
+
+  if (payload.code === "INVALID_USERNAME_OR_PASSWORD") {
+    return "Invalid username or password.";
+  }
+
+  if (payload.code === "USER_ALREADY_EXISTS") {
+    return "User with this email or username already exists.";
+  }
+
+  return payload.message || (mode === "sign-up" ? "Could not create account." : "Could not sign in.");
+}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -38,15 +61,20 @@ export default function LoginForm() {
       });
 
       if (!res.ok) {
-        const text = await res.text();
-        setError(text || "Request failed");
+        const payload = (await res.json().catch(() => null)) as BetterAuthErrorPayload | null;
+        const message = mapAuthError(payload, mode);
+        setError(message);
+        toast.error(message);
         return;
       }
 
+      toast.success(mode === "sign-up" ? "Account created." : "Signed in successfully.");
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

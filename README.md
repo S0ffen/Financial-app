@@ -109,6 +109,63 @@ Before you run the project locally, you need:
 npm install
 ```
 
+## Quick Start
+
+Run the project locally from scratch:
+
+1. Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd financial-app
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file in the project root:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME?schema=financial"
+BETTER_AUTH_SECRET="your-long-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# Optional admin bootstrap
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD="StrongPassword123!"
+ADMIN_USERNAME="admin"
+ADMIN_NAME="System Admin"
+```
+
+4. Run database migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+5. Generate Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+6. Start the development server:
+
+```bash
+npm run dev
+```
+
+7. Open the app:
+
+```text
+http://localhost:3000
+```
+
+The root route redirects to `/login`.
+
 ## Environment Variables
 
 Create a `.env` file in the project root.
