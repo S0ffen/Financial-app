@@ -154,11 +154,10 @@ export default async function DashboardPage({
 
   return (
     <main
-      style={{ backgroundImage: "url('dashboard.jpg')" }}
+      // style={{ backgroundImage: "url('/dashboard.jpg')" }}
       className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6"
     >
       <h1 className="text-2xl font-semibold text-zinc-100">Dashboard</h1>
-      <p className="text-sm text-zinc-400">To jest przykladowa strona po zalogowaniu.</p>
       <MonthFilter />
       <MonthlySummaryCards income={savingsSummary.income} expenses={savingsSummary.expenses} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
