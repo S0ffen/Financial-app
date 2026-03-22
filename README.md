@@ -14,9 +14,9 @@ It includes authentication, an admin panel, a dashboard with charts, month/year 
 
 ### Authentication
 
-- Email + password authentication with Better Auth
-- Optional username-based login
-- Session-based protected routes
+- Sign in with `username + password`
+- Sign up with `name + username + email + password`
+- Session-based protected routes with Better Auth
 - Optional admin account bootstrapped from `.env`
 - Admin panel for resetting user passwords
 
@@ -50,7 +50,7 @@ It includes authentication, an admin panel, a dashboard with charts, month/year 
 - Review flow for rows that need manual fixes
 - Ability to drop unwanted rows before import
 - Learns from previously categorized expenses for better future suggestions
-- Ignores internal transfers such as `przelew w?asny`
+- Ignores internal transfers such as `przelew wlasny`
 
 ### UI / UX
 
@@ -124,10 +124,10 @@ BETTER_AUTH_URL="http://localhost:3000"
 Optional variables:
 
 ```env
-
 # Optional admin bootstrap
 ADMIN_EMAIL="admin@example.com"
 ADMIN_PASSWORD="StrongPassword123!"
+ADMIN_USERNAME="admin"
 ADMIN_NAME="System Admin"
 ```
 
@@ -139,15 +139,11 @@ ADMIN_NAME="System Admin"
   - secret used by Better Auth to sign and verify sessions/tokens
   - keep it stable between deploys
 - `BETTER_AUTH_URL`
-  - base URL of the app
+  - base URL of the app used by Better Auth
   - local example: `http://localhost:3000`
   - production example: `https://finance.yourdomain.com`
-- `RESEND_API_KEY`
-  - reserved for email sending / verification flows
-- `RESEND_FROM_EMAIL`
-  - verified sender address for Resend
-- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`
-  - if provided, the app will create this user if missing and enforce `role=admin` on startup
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_USERNAME`, `ADMIN_NAME`
+  - if provided, the app will create this user if missing and enforce admin role, username and display name on startup
 
 ## Database Setup
 
@@ -181,6 +177,15 @@ http://localhost:3000
 
 The root route redirects to `/login`.
 
+## Authentication Flow
+
+Current auth flow in the app:
+
+- sign in: `username + password`
+- sign up: `name + username + email + password`
+
+`email` is still stored in the database, but it is not the primary login identifier in the current UI.
+
 ## Default App Routes
 
 Main routes in the current app:
@@ -199,7 +204,9 @@ If `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set, the app bootstraps an admin accou
 Behavior:
 
 - if the user does not exist, the app creates it
-- if the user exists but is not admin, the app updates the role to `admin`
+- on every app start, the admin account is updated to use `ADMIN_NAME`
+- on every app start, the admin account is updated to use `ADMIN_USERNAME`
+- on every app start, the admin account is enforced as `role=admin`
 - the admin account is marked as `emailVerified=true`
 
 This happens on app startup in the auth setup.

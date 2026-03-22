@@ -21,10 +21,24 @@ type GlobalForAdminBootstrap = typeof globalThis & {
 const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const adminPassword = process.env.ADMIN_PASSWORD?.trim();
 const adminName = process.env.ADMIN_NAME?.trim() || "System Admin";
+const adminUsername =
+  process.env.ADMIN_USERNAME?.trim().toLowerCase() || adminEmail?.split("@")[0] || null;
 
 async function bootstrapAdminUser() {
-  if (!adminEmail || !adminPassword) {
+  if (!adminEmail || !adminPassword || !adminUsername) {
     return;
+  }
+
+  const conflictingUsername = await prisma.user.findFirst({
+    where: {
+      username: adminUsername,
+      email: { not: adminEmail },
+    },
+    select: { id: true },
+  });
+
+  if (conflictingUsername) {
+    throw new Error(`ADMIN_USERNAME "${adminUsername}" is already used by another account.`);
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -40,6 +54,8 @@ async function bootstrapAdminUser() {
           email: adminEmail,
           password: adminPassword,
           name: adminName,
+          username: adminUsername,
+          displayUsername: adminName,
         },
       });
     } catch (error) {
@@ -50,13 +66,15 @@ async function bootstrapAdminUser() {
     }
   }
 
-  // Always enforce admin role for env admin account.
+  // Always enforce admin role, login username and display name for the env-based admin account.
   await prisma.user.updateMany({
     where: {
       email: adminEmail,
-      role: { not: "admin" },
     },
     data: {
+      name: adminName,
+      username: adminUsername,
+      displayUsername: adminName,
       role: "admin",
       emailVerified: true,
     },
