@@ -12,7 +12,7 @@ It includes authentication, an admin panel, a dashboard with charts, month/year 
 
 ## 🎥 Demo Video
 
-[![Watch the demo](https://img.youtube.com/vi/ekrRUAdY5L8/0.jpg)](https://youtu.be/ekrRUAdY5L8)
+https://github.com/user-attachments/assets/53d7752f-7617-45e9-8a1d-8566a9886ffb
 
 ## Features
 
