@@ -55,31 +55,37 @@ export const AddExpenseDialog: React.FC = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="btn-dark-pill">Add new expense</Button>
+        <button
+          type="button"
+          className="btn-dark-pill inline-flex h-9 min-w-[11rem] items-center justify-center px-4 text-sm font-medium"
+        >
+          Add new expense
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
-        <form onSubmit={handleSubmit}>
+      <DialogContent className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-sm">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
             <DialogTitle>Add new expense</DialogTitle>
-            <DialogDescription>Fill in the details for the new expense.</DialogDescription>
+            <DialogDescription className="text-zinc-400">Fill in the details for the new expense.</DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date" className="text-zinc-100">Date</Label>
               <Input
                 id="date"
                 name="date"
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
+                className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
               />
             </Field>
             <Field>
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" className="text-zinc-100">Category</Label>
               <select
                 id="category"
                 name="category"
                 defaultValue={expenseCategories[0]}
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900/60 px-3 py-1 text-sm text-zinc-100 shadow-xs outline-none focus-visible:border-zinc-500 focus-visible:ring-zinc-500/40 focus-visible:ring-[3px]"
               >
                 {expenseCategories.map((category) => (
                   <option key={category} value={category}>
@@ -89,7 +95,7 @@ export const AddExpenseDialog: React.FC = () => {
               </select>
             </Field>
             <Field>
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount" className="text-zinc-100">Amount</Label>
               <div className="flex gap-2">
                 <Input
                   id="amount"
@@ -99,12 +105,13 @@ export const AddExpenseDialog: React.FC = () => {
                   step={0.01}
                   min={0.01}
                   inputMode="decimal"
+                  className="border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
                 />
                 <select
                   id="currency"
                   name="currency"
                   defaultValue="PLN"
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  className="h-9 w-full rounded-md border border-zinc-700 bg-zinc-900/60 px-3 py-1 text-sm text-zinc-100 shadow-xs outline-none focus-visible:border-zinc-500 focus-visible:ring-zinc-500/40 focus-visible:ring-[3px]"
                 >
                   {currencies.map((currency) => (
                     <option key={currency} value={currency}>
@@ -115,15 +122,28 @@ export const AddExpenseDialog: React.FC = () => {
               </div>
             </Field>
             <Field>
-              <Label htmlFor="description">Description</Label>
-              <Input id="description" name="description" defaultValue="" className="mb-4" />
+              <Label htmlFor="description" className="text-zinc-100">Description</Label>
+              <Input
+                id="description"
+                name="description"
+                defaultValue=""
+                className="mb-4 border-zinc-700 bg-zinc-900/60 text-zinc-100 placeholder:text-zinc-500"
+              />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 hover:text-zinc-50"
+              >
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
+              Save changes
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

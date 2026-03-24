@@ -10,6 +10,10 @@ The app focuses on three core areas:
 
 It includes authentication, an admin panel, a dashboard with charts, month/year filtering, bulk actions for expenses, and CSV import with preview/review before saving.
 
+## 🎥 Demo Video
+
+[![Watch the demo](https://img.youtube.com/vi/ekrRUAdY5L8/0.jpg)](https://youtu.be/ekrRUAdY5L8)
+
 ## Features
 
 ### Authentication

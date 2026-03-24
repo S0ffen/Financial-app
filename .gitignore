@@ -47,3 +47,4 @@ next-env.d.ts
 /app/generated/prisma
 Lista_transakcji_nr_0234147560_200326.csv
 public/dashboard.jpg
+fake_ing_import_test.csv

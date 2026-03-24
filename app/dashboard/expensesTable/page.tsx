@@ -68,18 +68,20 @@ export default async function ExpensesTablePage({ searchParams }: ExpensesTableP
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
-      <h1 className="text-2xl font-semibold text-zinc-100">Expenses</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold text-zinc-100">Expenses</h1>
+        <div className="flex flex-wrap gap-3 sm:justify-end">
+          <AddExpenseDialog />
+          <Link
+            href="/dashboard/expenses/import"
+            className="btn-dark-pill inline-flex min-w-[11rem] items-center justify-center"
+          >
+            Import CSV
+          </Link>
+        </div>
+      </div>
       <MonthFilter />
       <CategoryFilter />
-      <div className="flex flex-wrap gap-3">
-        <AddExpenseDialog />
-        <Link
-          href="/dashboard/expenses/import"
-          className="btn-dark-pill inline-flex items-center justify-center"
-        >
-          Import CSV
-        </Link>
-      </div>
 
       {normalizedExpenses.length === 0 ? (
         <section className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
